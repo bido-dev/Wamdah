@@ -1,0 +1,821 @@
+:root {
+  /* ألوان الهوية البصرية لجامعة الملك سعود - كلية الحاسب KSU CCIS */
+  --ksu-navy: #0b3b5c;
+  --ksu-blue: #0084BD;
+  --ksu-gold: #c5a880;
+  --ksu-dark-gold: #b39266;
+  --ksu-cream: #f9f8f3;
+  --ksu-cream-dark: #f0ede1;
+  --ksu-white: #ffffff;
+  --ksu-gray-light: #f5f5f5;
+  --ksu-gray-medium: #e0e0e0;
+  --ksu-gray-dark: #6e7a82;
+  --ksu-text-dark: #1b2e3c;
+  --ksu-text-muted: #576d7f;
+  --ksu-text-light: #ffffff;
+  --ksu-success: #10b981;
+  --ksu-error: #ef4444;
+  --ksu-warning: #f59e0b;
+
+  /* التأثيرات والحدود */
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --shadow-sm: 0 2px 4px rgba(11, 59, 92, 0.05);
+  --shadow-md: 0 10px 25px rgba(11, 59, 92, 0.08);
+  --shadow-lg: 0 20px 40px rgba(11, 59, 92, 0.12);
+  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: all 0.15s ease;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  font-family: var(--font-cairo), Cairo, system-ui, -apple-system, sans-serif;
+  background-color: var(--ksu-cream);
+  color: var(--ksu-text-dark);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+.wamda-app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* الرأس - الهيدر */
+.app-header {
+  background-color: var(--ksu-navy);
+  color: var(--ksu-text-light);
+  padding: 1rem 2rem;
+  box-shadow: var(--shadow-sm);
+  border-bottom: 3px solid var(--ksu-gold);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  backdrop-filter: blur(10px);
+  background-color: rgba(11, 59, 92, 0.95);
+}
+
+.header-logo-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-icon {
+  background: linear-gradient(135deg, var(--ksu-blue) 0%, var(--ksu-gold) 100%);
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.4rem;
+  color: var(--ksu-white);
+  box-shadow: 0 0 15px rgba(0, 132, 189, 0.4);
+  animation: pulse 3s infinite;
+}
+
+.logo-text-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.logo-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  background: linear-gradient(to left, var(--ksu-white), var(--ksu-gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.logo-subtitle {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--ksu-gold);
+  opacity: 0.9;
+}
+
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.university-tag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--ksu-cream-dark);
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+  padding-right: 1rem;
+}
+
+.university-tag span {
+  font-weight: 600;
+  color: var(--ksu-gold);
+}
+
+/* محتوى الصفحة الرئيسي */
+.app-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ذيل الصفحة - الفوتر */
+.app-footer {
+  background-color: var(--ksu-navy);
+  color: var(--ksu-text-light);
+  padding: 1.5rem;
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.85rem;
+}
+
+.footer-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+
+.footer-ksu-info {
+  color: var(--ksu-gold);
+  font-weight: 600;
+}
+
+/* الصفحة الرئيسية والبطاقات */
+.home-hero-section {
+  text-align: center;
+  margin-bottom: 3.5rem;
+  animation: fadeInDown 0.8s ease-out;
+}
+
+.hero-badge {
+  background-color: rgba(0, 132, 189, 0.1);
+  color: var(--ksu-blue);
+  padding: 6px 16px;
+  border-radius: 30px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  display: inline-block;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(0, 132, 189, 0.2);
+}
+
+.home-title {
+  font-size: 2.8rem;
+  font-weight: 800;
+  color: var(--ksu-navy);
+  margin-bottom: 1rem;
+}
+
+.home-title span {
+  color: var(--ksu-blue);
+  position: relative;
+}
+
+.home-title span::after {
+  content: "";
+  position: absolute;
+  bottom: 4px;
+  left: 0;
+  width: 100%;
+  height: 8px;
+  background-color: rgba(197, 168, 128, 0.3);
+  z-index: -1;
+  border-radius: 4px;
+}
+
+.home-desc {
+  font-size: 1.15rem;
+  color: var(--ksu-text-muted);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.modes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+  width: 100%;
+  max-width: 1050px;
+  margin-bottom: 2rem;
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.mode-card {
+  background-color: var(--ksu-white);
+  border-radius: var(--radius-md);
+  padding: 2.5rem 2rem;
+  box-shadow: var(--shadow-md);
+  border: 1px solid rgba(11, 59, 92, 0.05);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.mode-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  background: transparent;
+  transition: var(--transition-smooth);
+}
+
+.mode-card.send-card::before {
+  background: linear-gradient(90deg, var(--ksu-blue), var(--ksu-gold));
+}
+
+.mode-card.receive-card::before {
+  background: linear-gradient(90deg, var(--ksu-gold), var(--ksu-navy));
+}
+
+.mode-card.group-card::before {
+  background: linear-gradient(90deg, var(--ksu-navy), var(--ksu-blue));
+}
+
+.mode-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-lg);
+  border-color: rgba(197, 168, 128, 0.3);
+}
+
+.card-icon-container {
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  font-size: 2rem;
+  transition: var(--transition-smooth);
+}
+
+.send-card .card-icon-container {
+  background-color: rgba(0, 132, 189, 0.08);
+  color: var(--ksu-blue);
+}
+
+.receive-card .card-icon-container {
+  background-color: rgba(197, 168, 128, 0.12);
+  color: var(--ksu-dark-gold);
+}
+
+.group-card .card-icon-container {
+  background-color: rgba(11, 59, 92, 0.08);
+  color: var(--ksu-navy);
+}
+
+.mode-card:hover .card-icon-container {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.card-title {
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--ksu-navy);
+  margin-bottom: 0.75rem;
+}
+
+.card-desc {
+  font-size: 0.95rem;
+  color: var(--ksu-text-muted);
+  line-height: 1.5;
+}
+
+/* المكونات التفصيلية للعمليات */
+.panel-container {
+  background-color: var(--ksu-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 3rem 2.5rem;
+  width: 100%;
+  max-width: 650px;
+  border: 1px solid rgba(197, 168, 128, 0.2);
+  position: relative;
+  animation: scaleUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.back-button {
+  background: none;
+  border: none;
+  color: var(--ksu-text-muted);
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2rem;
+  transition: var(--transition-fast);
+}
+
+.back-button:hover {
+  color: var(--ksu-navy);
+  transform: translateX(4px);
+}
+
+.panel-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.panel-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--ksu-navy);
+  margin-bottom: 0.5rem;
+}
+
+.panel-desc {
+  font-size: 0.95rem;
+  color: var(--ksu-text-muted);
+}
+
+/* حقول إدخال الرمز المكون من 6 أرقام */
+.pin-input-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  direction: ltr; /* ليكون الترتيب من اليسار لليمين مريحاً للأرقام */
+  margin-bottom: 2rem;
+}
+
+.pin-digit-input {
+  width: 52px;
+  height: 60px;
+  border: 2px solid var(--ksu-gray-medium);
+  border-radius: var(--radius-sm);
+  font-size: 1.8rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--ksu-navy);
+  outline: none;
+  transition: var(--transition-fast);
+}
+
+.pin-digit-input:focus {
+  border-color: var(--ksu-blue);
+  box-shadow: 0 0 10px rgba(0, 132, 189, 0.25);
+  transform: scale(1.05);
+}
+
+/* واجهة إسقاط ورفع الملفات */
+.upload-zone {
+  border: 2.5px dashed var(--ksu-gray-medium);
+  border-radius: var(--radius-md);
+  padding: 3rem 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  background-color: var(--ksu-gray-light);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 2rem;
+}
+
+.upload-zone:hover, .upload-zone.dragging {
+  border-color: var(--ksu-blue);
+  background-color: var(--ksu-light-blue);
+}
+
+.upload-icon {
+  font-size: 3rem;
+  color: var(--ksu-blue);
+  transition: var(--transition-smooth);
+}
+
+.upload-zone:hover .upload-icon {
+  transform: translateY(-5px);
+}
+
+.file-input {
+  display: none;
+}
+
+/* تبديل الإرسال (رابط أو ملف) */
+.send-type-tabs {
+  display: flex;
+  background-color: var(--ksu-gray-light);
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 2rem;
+}
+
+.tab-btn {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 10px;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--ksu-text-muted);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.tab-btn.active {
+  background-color: var(--ksu-white);
+  color: var(--ksu-navy);
+  box-shadow: var(--shadow-sm);
+}
+
+/* روابط الادخال */
+.url-input-container {
+  margin-bottom: 2rem;
+}
+
+.text-input-field {
+  width: 100%;
+  padding: 1rem 1.2rem;
+  border: 2px solid var(--ksu-gray-medium);
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  font-family: inherit;
+  outline: none;
+  transition: var(--transition-fast);
+  color: var(--ksu-navy);
+}
+
+.text-input-field:focus {
+  border-color: var(--ksu-blue);
+  box-shadow: 0 0 10px rgba(0, 132, 189, 0.25);
+}
+
+/* الأزرار العامة */
+.wamda-btn {
+  width: 100%;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.btn-primary {
+  background-color: var(--ksu-blue);
+  color: var(--ksu-white);
+  box-shadow: 0 5px 15px rgba(0, 132, 189, 0.3);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #0073a5;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 132, 189, 0.4);
+}
+
+.btn-primary:disabled {
+  background-color: var(--ksu-gray-medium);
+  color: var(--ksu-gray-dark);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.btn-secondary {
+  background-color: var(--ksu-navy);
+  color: var(--ksu-white);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-secondary:hover {
+  background-color: #072a42;
+  transform: translateY(-2px);
+}
+
+/* شاشة الاستقبال وعرض الرمز */
+.receive-code-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.code-numbers {
+  font-size: 3.2rem;
+  font-weight: 800;
+  color: var(--ksu-navy);
+  letter-spacing: 6px;
+  background-color: var(--ksu-gray-light);
+  padding: 0.5rem 2rem;
+  border-radius: var(--radius-md);
+  border: 2px dashed var(--ksu-gold);
+  text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.8);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  position: relative;
+  transition: var(--transition-fast);
+}
+
+.code-numbers:hover {
+  transform: scale(1.03);
+}
+
+.qr-code-wrapper {
+  background: var(--ksu-white);
+  padding: 16px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--ksu-gray-medium);
+}
+
+.waiting-pulse-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 1rem;
+}
+
+.pulse-indicator {
+  width: 14px;
+  height: 14px;
+  background-color: var(--ksu-gold);
+  border-radius: 50%;
+  animation: pulse-gold 1.5s infinite;
+}
+
+.waiting-text {
+  font-size: 0.95rem;
+  color: var(--ksu-text-muted);
+  font-weight: 600;
+}
+
+/* شاشة الاستلام الناجح */
+.success-card {
+  text-align: center;
+  animation: bounceIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.success-icon {
+  width: 64px;
+  height: 64px;
+  background-color: rgba(16, 185, 129, 0.1);
+  color: var(--ksu-success);
+  font-size: 2.2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem auto;
+}
+
+.success-title {
+  font-size: 1.6rem;
+  color: var(--ksu-navy);
+  margin-bottom: 0.75rem;
+  font-weight: 700;
+}
+
+.transfer-details-box {
+  background-color: var(--ksu-gray-light);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border: 1px solid var(--ksu-gray-medium);
+  text-align: right;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(11, 59, 92, 0.05);
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  color: var(--ksu-text-muted);
+  font-size: 0.9rem;
+}
+
+.detail-value {
+  font-weight: 700;
+  color: var(--ksu-navy);
+  max-width: 250px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* واجهة المجموعات */
+.group-actions-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.group-member-count {
+  background-color: var(--ksu-light-blue);
+  color: var(--ksu-blue);
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-align: center;
+  border: 1px solid rgba(0, 132, 189, 0.15);
+  margin-bottom: 1.5rem;
+}
+
+.group-member-count span {
+  font-size: 1.2rem;
+  color: var(--ksu-navy);
+}
+
+/* التنبيهات */
+.alert-box {
+  padding: 1rem 1.2rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: fadeIn 0.3s ease;
+}
+
+.alert-error {
+  background-color: #fee2e2;
+  color: var(--ksu-error);
+  border: 1px solid #fca5a5;
+}
+
+.alert-info {
+  background-color: var(--ksu-light-blue);
+  color: var(--ksu-blue);
+  border: 1px solid rgba(0, 132, 189, 0.2);
+}
+
+/* تأثيرات حركية (Keyframes) */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 132, 189, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(0, 132, 189, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 132, 189, 0);
+  }
+}
+
+@keyframes pulse-gold {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(197, 168, 128, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 8px rgba(197, 168, 128, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(197, 168, 128, 0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleUp {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.1);
+  }
+  80% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* شريط تحميل الرفع */
+.progress-bar-container {
+  width: 100%;
+  background-color: var(--ksu-gray-medium);
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 1rem;
+}
+
+.progress-bar {
+  background-color: var(--ksu-blue);
+  height: 100%;
+  width: 0%;
+  transition: width 0.1s ease;
+}
+
+/* الاستجابة للهواتف */
+@media (max-width: 768px) {
+  .app-header {
+    padding: 1rem;
+  }
+  
+  .university-tag {
+    display: none;
+  }
+  
+  .home-title {
+    font-size: 2.2rem;
+  }
+  
+  .panel-container {
+    padding: 2rem 1.5rem;
+  }
+  
+  .pin-digit-input {
+    width: 42px;
+    height: 50px;
+    font-size: 1.5rem;
+  }
+}
