@@ -14,7 +14,7 @@ export default function SendPanel({ initialCode, onBack }: SendPanelProps) {
   const [sessionVerified, setSessionVerified] = useState(false);
   const [sessionType, setSessionType] = useState<'individual' | 'group' | null>(null);
   const [activeTab, setActiveTab] = useState<'file' | 'link'>('file');
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [linkUrl, setLinkUrl] = useState('');
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -92,22 +92,29 @@ export default function SendPanel({ initialCode, onBack }: SendPanelProps) {
   // معالجة اختيار الملفات
   const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setSelectedFile(e.dataTransfer.files[0]);
+    if (e.dataTransfer.files) {
+      const filesArray = Array.from(e.dataTransfer.files);
+      setSelectedFiles(prev => [...prev, ...filesArray]);
     }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0]);
+    if (e.target.files) {
+      const filesArray = Array.from(e.target.files);
+      setSelectedFiles(prev => [...prev, ...filesArray]);
     }
+  };
+
+  const handleRemoveFile = (indexToRemove: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedFiles(prev => prev.filter((_, idx) => idx !== indexToRemove));
   };
 
   // إرسال الملف أو الرابط
   const handleSubmit = async () => {
     const fullCode = code.join('');
-    if (activeTab === 'file' && !selectedFile) {
-      setError('الرجاء اختيار ملف للإرسال');
+    if (activeTab === 'file' && selectedFiles.length === 0) {
+      setError('الرجاء اختيار ملف واحد على الأقل للإرسال');
       return;
     }
     if (activeTab === 'link' && !linkUrl) {
@@ -136,34 +143,42 @@ export default function SendPanel({ initialCode, onBack }: SendPanelProps) {
           const errData = await res.json();
           throw new Error(errData.error || 'حدث خطأ أثناء إرسال الرابط');
         }
-      } else if (activeTab === 'file' && selectedFile) {
-        // Upload directly to Supabase storage from the client
-        const fileExt = selectedFile.name.split('.').pop()?.replace(/[^a-zA-Z0-9]/g, '') || 'bin';
-        const uniqueName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
-        const storagePath = `${fullCode}/${uniqueName}`;
+      } else if (activeTab === 'file' && selectedFiles.length > 0) {
+        const uploadedFiles = [];
+        let completedFilesCount = 0;
 
-        setUploadProgress(30);
+        for (const file of selectedFiles) {
+          // Upload directly to Supabase storage from the client
+          const fileExt = file.name.split('.').pop()?.replace(/[^a-zA-Z0-9]/g, '') || 'bin';
+          const uniqueName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+          const storagePath = `${fullCode}/${uniqueName}`;
 
-        // Upload using Supabase JS client
-        const { error: uploadError } = await supabase.storage
-          .from('uploads')
-          .upload(storagePath, selectedFile, {
-            cacheControl: '3600',
-            upsert: false,
+          const { error: uploadError } = await supabase.storage
+            .from('uploads')
+            .upload(storagePath, file, {
+              cacheControl: '3600',
+              upsert: false,
+            });
+
+          if (uploadError) {
+            throw new Error(`فشل رفع الملف ${file.name}: ` + uploadError.message);
+          }
+
+          // Get public URL
+          const { data: publicUrlData } = supabase.storage
+            .from('uploads')
+            .getPublicUrl(storagePath);
+          
+          uploadedFiles.push({
+            name: file.name,
+            url: publicUrlData.publicUrl,
+            type: file.type,
+            size: file.size,
           });
 
-        if (uploadError) {
-          throw new Error('فشل رفع الملف إلى التخزين السحابي: ' + uploadError.message);
+          completedFilesCount++;
+          setUploadProgress(10 + Math.floor((completedFilesCount / selectedFiles.length) * 70));
         }
-
-        setUploadProgress(70);
-
-        // Get public URL
-        const { data: publicUrlData } = supabase.storage
-          .from('uploads')
-          .getPublicUrl(storagePath);
-        
-        const fileUrl = publicUrlData.publicUrl;
 
         // Post metadata to server
         const res = await fetch('/api/wamda?action=upload', {
@@ -171,16 +186,16 @@ export default function SendPanel({ initialCode, onBack }: SendPanelProps) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             code: fullCode,
-            fileUrl,
-            fileName: selectedFile.name,
-            fileType: selectedFile.type,
-            fileSize: selectedFile.size,
+            fileUrl: JSON.stringify(uploadedFiles),
+            fileName: 'multiple_files',
+            fileType: 'application/json',
+            fileSize: uploadedFiles.reduce((acc, f) => acc + f.size, 0),
           }),
         });
 
         if (!res.ok) {
           const errData = await res.json();
-          throw new Error(errData.error || 'حدث خطأ أثناء حفظ بيانات الملف');
+          throw new Error(errData.error || 'حدث خطأ أثناء حفظ بيانات الملفات');
         }
       }
 
@@ -259,35 +274,75 @@ export default function SendPanel({ initialCode, onBack }: SendPanelProps) {
           </div>
 
           {activeTab === 'file' ? (
-            <div
-              className="upload-zone"
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={handleFileDrop}
-              onClick={() => inputRefs.current[6]?.click()}
-            >
-              <div className="upload-icon">📥</div>
-              <div>
-                {selectedFile ? (
-                  <p style={{ fontWeight: 'bold', color: 'var(--ksu-navy)' }}>
-                    {selectedFile.name} ({(selectedFile.size / (1024 * 1024)).toFixed(2)} MB)
+            <div>
+              <div
+                className="upload-zone"
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={handleFileDrop}
+                onClick={() => inputRefs.current[6]?.click()}
+              >
+                <div className="upload-icon">📥</div>
+                <div>
+                  <p style={{ fontWeight: 'bold' }}>اسحب الملفات وأفلتها هنا أو اضغط للاختيار</p>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--ksu-text-muted)', marginTop: '5px' }}>
+                    يمكنك اختيار عدة ملفات (بحد أقصى 50 ميجابايت للملف الواحد)
                   </p>
-                ) : (
-                  <>
-                    <p style={{ fontWeight: 'bold' }}>اسحب الملف وأفلته هنا أو اضغط للاختيار</p>
-                    <p style={{ fontSize: '0.8rem', color: 'var(--ksu-text-muted)', marginTop: '5px' }}>
-                      الحد الأقصى لحجم الملف: 50 ميجابايت
-                    </p>
-                  </>
-                )}
+                </div>
+                <input
+                  type="file"
+                  multiple
+                  ref={(el) => {
+                    if (el) inputRefs.current[6] = el;
+                  }}
+                  className="file-input"
+                  onChange={handleFileChange}
+                />
               </div>
-              <input
-                type="file"
-                ref={(el) => {
-                  if (el) inputRefs.current[6] = el;
-                }}
-                className="file-input"
-                onChange={handleFileChange}
-              />
+
+              {selectedFiles.length > 0 && (
+                <div style={{ marginBottom: '1.5rem', textAlign: 'right' }}>
+                  <p style={{ fontWeight: 'bold', marginBottom: '8px', color: 'var(--ksu-navy)' }}>
+                    الملفات المختارة ({selectedFiles.length}):
+                  </p>
+                  <ul style={{ listStyle: 'none', padding: 0 }}>
+                    {selectedFiles.map((file, idx) => (
+                      <li
+                        key={idx}
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '8px 12px',
+                          background: '#f0f8ff',
+                          borderRadius: '8px',
+                          marginBottom: '6px',
+                          border: '1px solid #d0e8f5',
+                          fontSize: '0.9rem',
+                        }}
+                      >
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '70%' }}>
+                          {file.name} ({(file.size / (1024 * 1024)).toFixed(2)} MB)
+                        </span>
+                        <button
+                          type="button"
+                          onClick={(e) => handleRemoveFile(idx, e)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: 'var(--ksu-error)',
+                            cursor: 'pointer',
+                            fontWeight: 'bold',
+                            fontSize: '1.1rem',
+                            padding: '0 4px',
+                          }}
+                        >
+                          ✕
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           ) : (
             <div className="url-input-container">

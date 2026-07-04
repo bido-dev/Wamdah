@@ -27,7 +27,7 @@ export default function GroupPanel({ initialCode, onBack }: GroupPanelProps) {
   // خاص بالمرسل (إنشاء المجموعة)
   const [groupSession, setGroupSession] = useState<SessionData | null>(null);
   const [activeTab, setActiveTab] = useState<'file' | 'link'>('file');
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [linkUrl, setLinkUrl] = useState('');
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -37,6 +37,35 @@ export default function GroupPanel({ initialCode, onBack }: GroupPanelProps) {
   const [pinCode, setPinCode] = useState<string[]>(Array(6).fill(''));
   const [joinedSession, setJoinedSession] = useState<SessionData | null>(null);
   const [receiverSuccess, setReceiverSuccess] = useState(false);
+  const [downloadingFile, setDownloadingFile] = useState<string | null>(null);
+
+  const downloadFile = async (url: string, fileName: string, autoTransition: boolean) => {
+    setDownloadingFile(fileName);
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
+
+      if (autoTransition) {
+        setReceiverSuccess(true);
+      }
+    } catch (error) {
+      console.error('Failed download via blob', error);
+      window.open(url, '_blank');
+      if (autoTransition) {
+        setReceiverSuccess(true);
+      }
+    } finally {
+      setDownloadingFile(null);
+    }
+  };
 
   // عام
   const [error, setError] = useState<string | null>(null);
@@ -113,9 +142,14 @@ export default function GroupPanel({ initialCode, onBack }: GroupPanelProps) {
     channelRef.current = channel;
   };
 
+  const handleRemoveFile = (indexToRemove: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedFiles(prev => prev.filter((_, idx) => idx !== indexToRemove));
+  };
+
   const handleSenderSubmit = async () => {
     if (!groupSession) return;
-    if (activeTab === 'file' && !selectedFile) {
+    if (activeTab === 'file' && selectedFiles.length === 0) {
       setError('الرجاء اختيار ملف للرفع');
       return;
     }
@@ -145,34 +179,42 @@ export default function GroupPanel({ initialCode, onBack }: GroupPanelProps) {
           const errData = await res.json();
           throw new Error(errData.error || 'فشل إرسال الرابط');
         }
-      } else if (activeTab === 'file' && selectedFile) {
-        // Upload directly to Supabase storage from client
-        const fileExt = selectedFile.name.split('.').pop()?.replace(/[^a-zA-Z0-9]/g, '') || 'bin';
-        const uniqueName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
-        const storagePath = `${groupSession.code}/${uniqueName}`;
+      } else if (activeTab === 'file' && selectedFiles.length > 0) {
+        const uploadedFiles = [];
+        let completedFilesCount = 0;
 
-        setUploadProgress(40);
+        for (const file of selectedFiles) {
+          // Upload directly to Supabase storage from client
+          const fileExt = file.name.split('.').pop()?.replace(/[^a-zA-Z0-9]/g, '') || 'bin';
+          const uniqueName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+          const storagePath = `${groupSession.code}/${uniqueName}`;
 
-        // Upload using Supabase JS client
-        const { error: uploadError } = await supabase.storage
-          .from('uploads')
-          .upload(storagePath, selectedFile, {
-            cacheControl: '3600',
-            upsert: false,
+          const { error: uploadError } = await supabase.storage
+            .from('uploads')
+            .upload(storagePath, file, {
+              cacheControl: '3600',
+              upsert: false,
+            });
+
+          if (uploadError) {
+            throw new Error(`فشل رفع الملف ${file.name}: ` + uploadError.message);
+          }
+
+          // Get public URL
+          const { data: publicUrlData } = supabase.storage
+            .from('uploads')
+            .getPublicUrl(storagePath);
+          
+          uploadedFiles.push({
+            name: file.name,
+            url: publicUrlData.publicUrl,
+            type: file.type,
+            size: file.size,
           });
 
-        if (uploadError) {
-          throw new Error('فشل رفع الملف إلى التخزين السحابي: ' + uploadError.message);
+          completedFilesCount++;
+          setUploadProgress(20 + Math.floor((completedFilesCount / selectedFiles.length) * 60));
         }
-
-        setUploadProgress(75);
-
-        // Get public URL
-        const { data: publicUrlData } = supabase.storage
-          .from('uploads')
-          .getPublicUrl(storagePath);
-        
-        const fileUrl = publicUrlData.publicUrl;
 
         // Post metadata to server
         const res = await fetch('/api/wamda?action=upload', {
@@ -180,16 +222,16 @@ export default function GroupPanel({ initialCode, onBack }: GroupPanelProps) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             code: groupSession.code,
-            fileUrl,
-            fileName: selectedFile.name,
-            fileType: selectedFile.type,
-            fileSize: selectedFile.size,
+            fileUrl: JSON.stringify(uploadedFiles),
+            fileName: 'multiple_files',
+            fileType: 'application/json',
+            fileSize: uploadedFiles.reduce((acc, f) => acc + f.size, 0),
           }),
         });
 
         if (!res.ok) {
           const errData = await res.json();
-          throw new Error(errData.error || 'فشل حفظ بيانات الملف');
+          throw new Error(errData.error || 'فشل حفظ بيانات الملفات');
         }
       }
 
@@ -398,37 +440,84 @@ export default function GroupPanel({ initialCode, onBack }: GroupPanelProps) {
               </div>
 
               {activeTab === 'file' ? (
-                <div
-                  className="upload-zone"
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-                      setSelectedFile(e.dataTransfer.files[0]);
-                    }
-                  }}
-                  onClick={() => inputRefs.current[6]?.click()}
-                >
-                  <div className="upload-icon">📤</div>
-                  <div>
-                    {selectedFile ? (
-                      <p style={{ fontWeight: 'bold', color: 'var(--ksu-navy)' }}>
-                        {selectedFile.name} ({(selectedFile.size / (1024 * 1024)).toFixed(2)} MB)
-                      </p>
-                    ) : (
-                      <p style={{ fontWeight: 'bold' }}>اسحب ملف البث هنا أو اضغط للاختيار</p>
-                    )}
-                  </div>
-                  <input
-                    type="file"
-                    ref={(el) => { if (el) inputRefs.current[6] = el; }}
-                    className="file-input"
-                    onChange={(e) => {
-                      if (e.target.files && e.target.files[0]) {
-                        setSelectedFile(e.target.files[0]);
+                <div>
+                  <div
+                    className="upload-zone"
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      if (e.dataTransfer.files) {
+                        const filesArray = Array.from(e.dataTransfer.files);
+                        setSelectedFiles(prev => [...prev, ...filesArray]);
                       }
                     }}
-                  />
+                    onClick={() => inputRefs.current[6]?.click()}
+                  >
+                    <div className="upload-icon">📤</div>
+                    <div>
+                      <p style={{ fontWeight: 'bold' }}>اسحب الملفات وأفلتها هنا أو اضغط للاختيار</p>
+                      <p style={{ fontSize: '0.8rem', color: 'var(--ksu-text-muted)', marginTop: '5px' }}>
+                        يمكنك اختيار عدة ملفات (بحد أقصى 50 ميجابايت للملف الواحد)
+                      </p>
+                    </div>
+                    <input
+                      type="file"
+                      multiple
+                      ref={(el) => { if (el) inputRefs.current[6] = el; }}
+                      className="file-input"
+                      onChange={(e) => {
+                        if (e.target.files) {
+                          const filesArray = Array.from(e.target.files);
+                          setSelectedFiles(prev => [...prev, ...filesArray]);
+                        }
+                      }}
+                    />
+                  </div>
+
+                  {selectedFiles.length > 0 && (
+                    <div style={{ marginBottom: '1.5rem', textAlign: 'right' }}>
+                      <p style={{ fontWeight: 'bold', marginBottom: '8px', color: 'var(--ksu-navy)' }}>
+                        الملفات المختارة ({selectedFiles.length}):
+                      </p>
+                      <ul style={{ listStyle: 'none', padding: 0 }}>
+                        {selectedFiles.map((file, idx) => (
+                          <li
+                            key={idx}
+                            style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              padding: '8px 12px',
+                              background: '#f0f8ff',
+                              borderRadius: '8px',
+                              marginBottom: '6px',
+                              border: '1px solid #d0e8f5',
+                              fontSize: '0.9rem',
+                            }}
+                          >
+                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '70%' }}>
+                              {file.name} ({(file.size / (1024 * 1024)).toFixed(2)} MB)
+                            </span>
+                            <button
+                              type="button"
+                              onClick={(e) => handleRemoveFile(idx, e)}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                color: 'var(--ksu-error)',
+                                cursor: 'pointer',
+                                fontWeight: 'bold',
+                                fontSize: '1.1rem',
+                                padding: '0 4px',
+                              }}
+                            >
+                              ✕
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="url-input-container">
@@ -514,7 +603,7 @@ export default function GroupPanel({ initialCode, onBack }: GroupPanelProps) {
                 <div>
                   <div className="transfer-details-box">
                     <div className="detail-row">
-                      <span className="detail-label">رابط البث</span>
+                      <span className="detail-label">الرابط المستلم</span>
                       <span className="detail-value" style={{ direction: 'ltr', textAlign: 'left' }}>
                         {joinedSession.linkUrl}
                       </span>
@@ -532,26 +621,99 @@ export default function GroupPanel({ initialCode, onBack }: GroupPanelProps) {
                 </div>
               ) : (
                 <div>
-                  <div className="transfer-details-box">
-                    <div className="detail-row">
-                      <span className="detail-label">اسم الملف</span>
-                      <span className="detail-value">{joinedSession.fileName}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">حجم الملف</span>
-                      <span className="detail-value">{formatFileSize(joinedSession.fileSize)}</span>
-                    </div>
-                  </div>
+                  {/* Check if fileUrl is a JSON array */}
+                  {(() => {
+                    let filesList: Array<{ name: string; url: string; type: string; size: number }> = [];
+                    let isMultiple = false;
+                    if (joinedSession.fileUrl) {
+                      try {
+                        if (joinedSession.fileUrl.startsWith('[')) {
+                          filesList = JSON.parse(joinedSession.fileUrl);
+                          isMultiple = true;
+                        }
+                      } catch (e) {
+                        isMultiple = false;
+                      }
+                    }
 
-                  <a
-                    href={joinedSession.fileUrl}
-                    download={joinedSession.fileName}
-                    className="wamda-btn btn-primary"
-                    style={{ textDecoration: 'none' }}
-                    onClick={() => setReceiverSuccess(true)}
-                  >
-                    تحميل الملف المستلم 💾
-                  </a>
+                    if (isMultiple) {
+                      return (
+                        <div>
+                          <p style={{ fontWeight: 'bold', marginBottom: '12px', color: 'var(--ksu-navy)' }}>
+                            الملفات المرسلة من المعلم ({filesList.length}):
+                          </p>
+                          <ul style={{ listStyle: 'none', padding: 0, marginBottom: '1.5rem' }}>
+                            {filesList.map((file, idx) => (
+                              <li
+                                key={idx}
+                                style={{
+                                  display: 'flex',
+                                  justifyContent: 'space-between',
+                                  alignItems: 'center',
+                                  padding: '10px 14px',
+                                  background: '#f0f8ff',
+                                  borderRadius: '8px',
+                                  marginBottom: '8px',
+                                  border: '1px solid #d0e8f5',
+                                  fontSize: '0.9rem',
+                                }}
+                              >
+                                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '60%', textAlign: 'right' }}>
+                                  {file.name} ({formatFileSize(file.size)})
+                                </span>
+                                <button
+                                  className="wamda-btn btn-primary"
+                                  style={{
+                                    padding: '6px 12px',
+                                    fontSize: '0.8rem',
+                                    width: 'auto',
+                                    minWidth: '80px',
+                                    margin: 0
+                                  }}
+                                  onClick={() => downloadFile(file.url, file.name, false)}
+                                  disabled={downloadingFile !== null}
+                                >
+                                  {downloadingFile === file.name ? 'جاري التحميل...' : 'تحميل 💾'}
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+
+                          <button
+                            className="wamda-btn btn-secondary"
+                            onClick={() => {
+                              setReceiverSuccess(true);
+                            }}
+                          >
+                            تأكيد اكتمال تنزيل الكل
+                          </button>
+                        </div>
+                      );
+                    } else {
+                      return (
+                        <div>
+                          <div className="transfer-details-box">
+                            <div className="detail-row">
+                              <span className="detail-label">اسم الملف</span>
+                              <span className="detail-value">{joinedSession.fileName}</span>
+                            </div>
+                            <div className="detail-row">
+                              <span className="detail-label">حجم الملف</span>
+                              <span className="detail-value">{formatFileSize(joinedSession.fileSize)}</span>
+                            </div>
+                          </div>
+
+                          <button
+                            className="wamda-btn btn-primary"
+                            onClick={() => downloadFile(joinedSession.fileUrl || '', joinedSession.fileName || 'file', true)}
+                            disabled={downloadingFile !== null}
+                          >
+                            {downloadingFile ? 'جاري التحميل...' : 'تحميل وحفظ الملف المستلم 💾'}
+                          </button>
+                        </div>
+                      );
+                    }
+                  })()}
                 </div>
               )}
 
