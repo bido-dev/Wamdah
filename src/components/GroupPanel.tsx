@@ -240,6 +240,7 @@ export default function GroupPanel({ onBack }: GroupPanelProps) {
       </button>
 
       <div className="panel-header">
+        <div className="panel-header-icon">👥</div>
         <h2 className="panel-title">مشاركة المجموعات (بث جماعي)</h2>
         <p className="panel-desc">
           {role === null && 'اختر دورك، إما كمُرسل لإنشاء رمز مجموعة وبث للمستمعين، أو كمُستقبل للانضمام وتنزيل الملف.'}

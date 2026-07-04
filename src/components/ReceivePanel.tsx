@@ -115,6 +115,7 @@ export default function ReceivePanel({ onBack }: ReceivePanelProps) {
       </button>
 
       <div className="panel-header">
+        <div className="panel-header-icon">📥</div>
         <h2 className="panel-title">استقبال الملفات والروابط</h2>
         <p className="panel-desc">
           {!session || session.status === 'waiting'

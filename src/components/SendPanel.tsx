@@ -148,6 +148,7 @@ export default function SendPanel({ onBack }: SendPanelProps) {
       </button>
 
       <div className="panel-header">
+        <div className="panel-header-icon">📤</div>
         <h2 className="panel-title">إرسال ملف أو رابط</h2>
         <p className="panel-desc">
           {!sessionVerified

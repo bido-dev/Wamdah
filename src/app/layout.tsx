@@ -24,7 +24,7 @@ export default function RootLayout({
       dir="rtl"
       className={`${cairo.variable}`}
     >
-      <body className="wamda-app-container">{children}</body>
+      <body>{children}</body>
     </html>
   );
 }
