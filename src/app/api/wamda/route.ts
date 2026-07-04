@@ -17,6 +17,7 @@ const ALLOWED_MIME_PREFIXES = [
   'application/x-rar',
   'application/x-7z',
   'application/octet-stream',
+  'application/json',
   'text/',
   'image/',
   'video/',
