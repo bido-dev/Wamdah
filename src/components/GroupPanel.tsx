@@ -62,7 +62,7 @@ export default function GroupPanel({ onBack }: GroupPanelProps) {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/session', {
+      const res = await fetch('/api/wamda?action=create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type: 'group' }),
@@ -85,7 +85,7 @@ export default function GroupPanel({ onBack }: GroupPanelProps) {
   const startSenderPolling = (code: string) => {
     pollingRef.current = setInterval(async () => {
       try {
-        const res = await fetch(`/api/session?code=${code}`);
+        const res = await fetch(`/api/wamda?action=status&code=${code}`);
         if (!res.ok) return;
         const data: SessionData = await res.json();
         setGroupSession(data);
@@ -122,7 +122,7 @@ export default function GroupPanel({ onBack }: GroupPanelProps) {
 
       setUploadProgress(60);
 
-      const res = await fetch('/api/upload', {
+      const res = await fetch('/api/wamda?action=upload', {
         method: 'POST',
         body: formData,
       });
@@ -186,7 +186,7 @@ export default function GroupPanel({ onBack }: GroupPanelProps) {
 
     try {
       // إرسال join=true لتسجيل الانضمام في الـ API
-      const res = await fetch(`/api/session?code=${fullCode}&join=true`);
+      const res = await fetch(`/api/wamda?action=status&code=${fullCode}&join=true`);
       if (!res.ok) {
         const errData = await res.json();
         throw new Error(errData.error || 'رمز المجموعة غير صحيح أو انتهى وقتها');
@@ -212,7 +212,7 @@ export default function GroupPanel({ onBack }: GroupPanelProps) {
   const startReceiverPolling = (code: string) => {
     pollingRef.current = setInterval(async () => {
       try {
-        const res = await fetch(`/api/session?code=${code}`);
+        const res = await fetch(`/api/wamda?action=status&code=${code}`);
         if (!res.ok) return;
         const data: SessionData = await res.json();
         if (data.status === 'ready') {

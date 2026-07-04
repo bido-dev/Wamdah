@@ -36,7 +36,7 @@ export default function ReceivePanel({ onBack }: ReceivePanelProps) {
   useEffect(() => {
     const startSession = async () => {
       try {
-        const res = await fetch('/api/session', {
+        const res = await fetch('/api/wamda?action=create', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ type: 'individual' }),
@@ -65,7 +65,7 @@ export default function ReceivePanel({ onBack }: ReceivePanelProps) {
   const startPolling = (code: string) => {
     pollingRef.current = setInterval(async () => {
       try {
-        const res = await fetch(`/api/session?code=${code}`);
+        const res = await fetch(`/api/wamda?action=status&code=${code}`);
         if (res.status === 404) {
           // ربما انتهت الجلسة أو تم مسحها بالفعل
           stopPolling();

@@ -65,7 +65,7 @@ export default function SendPanel({ onBack }: SendPanelProps) {
 
     setError(null);
     try {
-      const res = await fetch(`/api/session?code=${fullCode}`);
+      const res = await fetch(`/api/wamda?action=status&code=${fullCode}`);
       if (!res.ok) {
         const errData = await res.json();
         throw new Error(errData.error || 'رمز الاتصال غير صحيح أو منتهي الصلاحية');
@@ -121,7 +121,7 @@ export default function SendPanel({ onBack }: SendPanelProps) {
 
       setUploadProgress(40);
 
-      const res = await fetch('/api/upload', {
+      const res = await fetch('/api/wamda?action=upload', {
         method: 'POST',
         body: formData,
       });
