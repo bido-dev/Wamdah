@@ -275,6 +275,8 @@ export default function GroupPanel({ initialCode, onBack }: GroupPanelProps) {
     if (initialCode && /^\d{6}$/.test(initialCode)) {
       setPinCode(initialCode.split(''));
       handleJoinGroup(initialCode);
+    } else if (!initialCode) {
+      handleCreateGroup();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialCode]);
@@ -339,20 +341,13 @@ export default function GroupPanel({ initialCode, onBack }: GroupPanelProps) {
 
       {error && <div className="alert-box alert-error">⚠️ {error}</div>}
 
-      {/* --- 1. واجهة الاختيار البدئية --- */}
+      {/* --- 1. واجهة التحضير التلقائي --- */}
       {role === null && (
-        <div className="modes-grid" style={{ gridTemplateColumns: '1fr 1fr', gap: '1.5rem', width: '100%' }}>
-          <div className="mode-card send-card" onClick={handleCreateGroup} style={{ padding: '2rem 1.5rem' }}>
-            <div className="card-icon-container">📢</div>
-            <h3 className="card-title">إنشاء بث (مرسل)</h3>
-            <p className="card-desc">احصل على رمز لمشاركته مع الطلاب لبث ملفك إليهم جميعاً.</p>
-          </div>
-
-          <div className="mode-card receive-card" onClick={() => setRole('receiver')} style={{ padding: '2rem 1.5rem' }}>
-            <div className="card-icon-container">👥</div>
-            <h3 className="card-title">انضمام للبث (مستقبل)</h3>
-            <p className="card-desc">أدخل الرمز الذي يقدمه المعلم لاستقبال الملف على جهازك.</p>
-          </div>
+        <div className="waiting-pulse-container" style={{ padding: '2rem 0' }}>
+          <div className="pulse-indicator"></div>
+          <span className="waiting-text" style={{ fontSize: '1.1rem' }}>
+            جاري تحضير البث الجماعي...
+          </span>
         </div>
       )}
 

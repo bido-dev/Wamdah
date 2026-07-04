@@ -724,7 +724,8 @@
 .team-card-photo {
   position: relative;
   z-index: 1;
-  margin-bottom: -20px;
+  margin-top: -65px;
+  margin-bottom: -15px;
 }
 
 .team-photo-img {
@@ -734,6 +735,11 @@
   object-fit: cover;
   object-position: top center;
   filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.2));
+}
+
+.team-card-sky .team-photo-img {
+  transform: scale(1.35);
+  transform-origin: bottom center;
 }
 
 .team-card-info {
