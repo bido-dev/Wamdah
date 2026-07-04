@@ -1,7 +1,9 @@
 :root {
   /* ألوان الهوية البصرية لجامعة الملك سعود - كلية الحاسب KSU CCIS */
-  --ksu-navy: #0b3b5c;
+  --ksu-navy: #0D1B3E;
   --ksu-blue: #0083BC;
+  --ksu-sky: #29ABE2;
+  --ksu-gradient: linear-gradient(135deg, var(--ksu-blue) 0%, var(--ksu-sky) 100%);
   --ksu-gold: #c5a880;
   --ksu-dark-gold: #b39266;
   --ksu-cream: #f9f8f3;
@@ -254,15 +256,15 @@ body {
 }
 
 .mode-card.send-card::before {
-  background: linear-gradient(90deg, var(--ksu-blue), var(--ksu-gold));
+  background: var(--ksu-gradient);
 }
 
 .mode-card.receive-card::before {
-  background: linear-gradient(90deg, var(--ksu-gold), var(--ksu-navy));
+  background: var(--ksu-gradient);
 }
 
 .mode-card.group-card::before {
-  background: linear-gradient(90deg, var(--ksu-navy), var(--ksu-blue));
+  background: var(--ksu-gradient);
 }
 
 .mode-card:hover {
@@ -336,7 +338,7 @@ body {
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, var(--ksu-blue), #29ABE2);
+  background: var(--ksu-gradient);
 }
 
 .back-button {
@@ -372,7 +374,7 @@ body {
 .panel-header-icon {
   width: 64px;
   height: 64px;
-  background: linear-gradient(135deg, var(--ksu-blue), #29ABE2);
+  background: var(--ksu-gradient);
   border-radius: 18px;
   display: flex;
   align-items: center;
@@ -385,9 +387,9 @@ body {
 .panel-title {
   font-size: 1.7rem;
   font-weight: 800;
-  color: #0b3b5c;
+  color: var(--ksu-navy);
   margin-bottom: 0.4rem;
-  background: linear-gradient(135deg, var(--ksu-blue), #005f88);
+  background: var(--ksu-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -490,7 +492,7 @@ body {
 }
 
 .tab-btn.active {
-  background: linear-gradient(135deg, var(--ksu-blue), #29ABE2);
+  background: var(--ksu-gradient);
   color: white;
   box-shadow: 0 4px 12px rgba(0, 131, 188, 0.3);
 }
@@ -538,13 +540,13 @@ body {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--ksu-blue) 0%, #005f88 100%);
+  background: var(--ksu-gradient);
   color: white;
   box-shadow: 0 6px 20px rgba(0, 131, 188, 0.35);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, #0096d4 0%, #0072a4 100%);
+  background: linear-gradient(135deg, #0083BC 0%, #1c9ad1 100%);
   transform: translateY(-2px);
   box-shadow: 0 10px 28px rgba(0, 131, 188, 0.45);
 }
