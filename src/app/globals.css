@@ -597,6 +597,9 @@ body {
   font-variant-numeric: tabular-nums;
   cursor: pointer;
   position: relative;
+  direction: ltr !important;
+  display: inline-block !important;
+  unicode-bidi: bidi-override !important;
   transition: var(--transition-fast);
 }
 
