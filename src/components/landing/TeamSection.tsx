@@ -41,7 +41,6 @@ export default function TeamSection() {
               </div>
               <div className="team-card-info">
                 <h3 className="team-name">{member.name}</h3>
-                <p className="team-role">{member.role}</p>
               </div>
             </div>
           ))}

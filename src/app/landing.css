@@ -724,8 +724,8 @@
 .team-card-photo {
   position: relative;
   z-index: 1;
-  margin-top: -65px;
-  margin-bottom: -15px;
+  margin-top: -110px;
+  margin-bottom: -10px;
 }
 
 .team-photo-img {
