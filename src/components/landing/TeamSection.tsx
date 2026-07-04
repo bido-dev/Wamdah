@@ -5,19 +5,19 @@ const teamMembers = [
     name: 'Bilal Zakkar',
     role: 'CEO',
     image: '/assets/team1.png',
-    variant: 'purple',
+    variant: 'sky',
   },
   {
     name: 'Abdalla Ammar',
     role: 'CTO',
     image: '/assets/team2.png',
-    variant: 'sky',
+    variant: 'blue',
   },
   {
     name: 'Sulaiman Mokhaniq',
     role: 'Web Designer',
     image: '/assets/team3.png',
-    variant: 'teal',
+    variant: 'navy',
   },
 ];
 
@@ -28,13 +28,15 @@ export default function TeamSection() {
         <div className="team-cards">
           {teamMembers.map((member) => (
             <div key={member.name} className={`team-card team-card-${member.variant}`}>
+              <div className="team-card-shape" aria-hidden="true" />
               <div className="team-card-photo">
                 <Image
                   src={member.image}
                   alt={member.name}
-                  width={200}
-                  height={200}
+                  width={280}
+                  height={360}
                   className="team-photo-img"
+                  priority
                 />
               </div>
               <div className="team-card-info">

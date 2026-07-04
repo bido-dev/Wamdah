@@ -690,80 +690,74 @@
 }
 
 .team-card {
-  background: white;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(13, 27, 62, 0.08);
-  border: 1px solid rgba(41, 171, 226, 0.15);
-  padding: 2.5rem 1.5rem;
+  position: relative;
   width: 260px;
   text-align: center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  padding-bottom: 2rem;
 }
 
-.team-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 20px 40px rgba(13, 27, 62, 0.15);
+.team-card-shape {
+  position: absolute;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%) skewX(-8deg);
+  width: 110%;
+  height: 280px;
+  z-index: 0;
+}
+
+.team-card-sky .team-card-shape {
+  background: linear-gradient(160deg, var(--landing-sky) 0%, var(--landing-purple) 100%);
+  clip-path: polygon(8% 0%, 100% 5%, 92% 100%, 0% 95%);
+}
+
+.team-card-blue .team-card-shape {
+  background: linear-gradient(160deg, var(--landing-purple) 0%, var(--landing-purple-dark) 100%);
+  clip-path: polygon(0% 8%, 95% 0%, 100% 92%, 5% 100%);
+}
+
+.team-card-navy .team-card-shape {
+  background: linear-gradient(160deg, var(--landing-navy) 0%, #1e305e 100%);
+  clip-path: polygon(5% 0%, 100% 8%, 95% 100%, 0% 92%);
 }
 
 .team-card-photo {
-  width: 140px;
-  height: 140px;
-  border-radius: 50%;
-  overflow: hidden;
-  margin-bottom: 1.5rem;
-  border: 4px solid var(--landing-white);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-  background: #f3f4f6;
   position: relative;
+  z-index: 1;
+  margin-bottom: -20px;
 }
 
 .team-photo-img {
   width: 100%;
-  height: 100%;
+  height: auto;
+  max-height: 320px;
   object-fit: cover;
-  object-position: center;
-  transition: transform 0.5s ease;
-}
-
-.team-card:hover .team-photo-img {
-  transform: scale(1.1);
+  object-position: top center;
+  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.2));
 }
 
 .team-card-info {
-  width: 100%;
+  position: absolute;
+  bottom: 24px;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  padding: 0 1rem;
 }
 
 .team-name {
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   font-weight: 800;
-  color: var(--landing-navy);
-  margin-bottom: 0.4rem;
+  color: white;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  margin-bottom: 0.2rem;
 }
 
 .team-role {
-  font-size: 0.9rem;
-  color: var(--landing-sky);
-  font-weight: 700;
-  background: rgba(41, 171, 226, 0.1);
-  padding: 4px 12px;
-  border-radius: 20px;
-  display: inline-block;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
 }
-
-.team-card-purple { border-color: rgba(0, 131, 188, 0.25); }
-.team-card-purple .team-role { color: var(--landing-purple); background: rgba(0, 131, 188, 0.08); }
-.team-card-purple .team-card-photo { border-color: var(--landing-purple); }
-
-.team-card-sky { border-color: rgba(41, 171, 226, 0.25); }
-.team-card-sky .team-role { color: var(--landing-sky); background: rgba(41, 171, 226, 0.08); }
-.team-card-sky .team-card-photo { border-color: var(--landing-sky); }
-
-.team-card-teal { border-color: rgba(0, 174, 239, 0.25); }
-.team-card-teal .team-role { color: var(--landing-teal); background: rgba(0, 174, 239, 0.08); }
-.team-card-teal .team-card-photo { border-color: var(--landing-teal); }
 
 /* ── Responsive ── */
 @media (max-width: 1024px) {
