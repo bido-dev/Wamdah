@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { supabase } from '@/lib/supabase';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 
 interface ReceivePanelProps {
   onBack: () => void;
@@ -23,7 +25,7 @@ export default function ReceivePanel({ onBack }: ReceivePanelProps) {
   const [loading, setLoading] = useState(true);
   const [origin, setOrigin] = useState('');
 
-  const pollingRef = useRef<NodeJS.Timeout | null>(null);
+  const channelRef = useRef<RealtimeChannel | null>(null);
 
   // استخراج أصل الموقع بعد التحميل في المتصفح لتوليد الباركود
   useEffect(() => {
@@ -47,10 +49,11 @@ export default function ReceivePanel({ onBack }: ReceivePanelProps) {
         setSession(data);
         setLoading(false);
 
-        // بدء عملية الفحص الدوري لحالة الجلسة
-        startPolling(data.code);
-      } catch (err: any) {
-        setError(err.message || 'حدث خطأ في النظام');
+        // بدء الاستماع اللحظي عبر Supabase Realtime
+        subscribeToSession(data.code);
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'حدث خطأ في النظام';
+        setError(message);
         setLoading(false);
       }
     };
@@ -58,37 +61,50 @@ export default function ReceivePanel({ onBack }: ReceivePanelProps) {
     startSession();
 
     return () => {
-      stopPolling();
+      unsubscribe();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const startPolling = (code: string) => {
-    pollingRef.current = setInterval(async () => {
-      try {
-        const res = await fetch(`/api/wamda?action=status&code=${code}`);
-        if (res.status === 404) {
-          // ربما انتهت الجلسة أو تم مسحها بالفعل
-          stopPolling();
-          setError('انتهت صلاحية الجلسة بسبب عدم النشاط.');
-          return;
+  // الاستماع اللحظي لتغييرات الجلسة عبر Supabase Realtime
+  const subscribeToSession = (code: string) => {
+    const channel = supabase
+      .channel(`session-${code}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'sessions',
+          filter: `pin_code=eq.${code}`,
+        },
+        (payload) => {
+          const row = payload.new as Record<string, unknown>;
+          if (row.status === 'ready') {
+            setSession({
+              code: row.pin_code as string,
+              type: (row.session_type as string) === 'GROUP' ? 'group' : 'individual',
+              status: 'ready',
+              fileUrl: (row.file_url as string) ?? undefined,
+              fileName: (row.file_name as string) ?? undefined,
+              fileType: (row.file_type as string) ?? undefined,
+              fileSize: (row.file_size as number) ?? undefined,
+              linkUrl: (row.link_url as string) ?? undefined,
+            });
+            // تم استلام الملف، إيقاف الاستماع
+            unsubscribe();
+          }
         }
-        if (!res.ok) return;
+      )
+      .subscribe();
 
-        const data: SessionData = await res.json();
-        if (data.status === 'ready') {
-          setSession(data);
-          stopPolling(); // تم استلام الملف بنجاح، إيقاف الفحص
-        }
-      } catch (err) {
-        console.error('Error polling session status:', err);
-      }
-    }, 1500); // التحقق كل 1.5 ثانية
+    channelRef.current = channel;
   };
 
-  const stopPolling = () => {
-    if (pollingRef.current) {
-      clearInterval(pollingRef.current);
-      pollingRef.current = null;
+  const unsubscribe = () => {
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current);
+      channelRef.current = null;
     }
   };
 
@@ -96,7 +112,7 @@ export default function ReceivePanel({ onBack }: ReceivePanelProps) {
   const handleCopyCode = () => {
     if (session?.code) {
       navigator.clipboard.writeText(session.code);
-      alert('تم نسخ الرمز المكون من 6 أرقام!');
+      // TODO(security): Replace alert() with a toast/modal component in production
     }
   };
 
@@ -237,7 +253,7 @@ export default function ReceivePanel({ onBack }: ReceivePanelProps) {
           <div className="success-icon" style={{ backgroundColor: 'rgba(0, 132, 189, 0.1)', color: 'var(--ksu-blue)' }}>⬇</div>
           <h3 className="success-title">اكتمل التحميل</h3>
           <p style={{ color: 'var(--ksu-text-muted)', marginBottom: '2rem' }}>
-            تم تنزيل الملف بنجاح، وتم حذفه نهائياً وفوراً من قاعدة بيانات "ومضة" المؤقتة لضمان أمان ومساحة الخوادم.
+            تم تنزيل الملف بنجاح، وتم حذفه نهائياً وفوراً من قاعدة بيانات &quot;ومضة&quot; المؤقتة لضمان أمان ومساحة الخوادم.
           </p>
           <button className="wamda-btn btn-secondary" onClick={onBack}>
             العودة للقائمة الرئيسية

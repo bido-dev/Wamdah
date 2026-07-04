@@ -1,8 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { supabase } from '@/lib/supabase';
+import crypto from 'crypto';
 
 // Consolidated API — all operations go through one serverless function
-// This ensures in-memory sessions are shared between create/get/upload/download
+// Files are uploaded directly to Supabase Storage, bypassing Vercel payload limits
+
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB limit
+
+// Allowed MIME type prefixes — broad categories for classroom use
+const ALLOWED_MIME_PREFIXES = [
+  'application/pdf',
+  'application/vnd.',        // Office docs (docx, pptx, xlsx, etc.)
+  'application/msword',
+  'application/zip',
+  'application/x-rar',
+  'application/x-7z',
+  'application/octet-stream',
+  'text/',
+  'image/',
+  'video/',
+  'audio/',
+];
+
+function isAllowedMimeType(mimeType: string): boolean {
+  return ALLOWED_MIME_PREFIXES.some(prefix => mimeType.startsWith(prefix));
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -18,7 +41,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'نوع الجلسة غير صالح' }, { status: 400 });
       }
 
-      const session = db.createSession(type);
+      const session = await db.createSession(type);
       return NextResponse.json(session);
     }
 
@@ -33,31 +56,86 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'رمز الاتصال مطلوب' }, { status: 400 });
       }
 
-      const session = db.getSession(code);
+      // Validate PIN format — must be exactly 6 digits
+      if (!/^\d{6}$/.test(code)) {
+        return NextResponse.json({ error: 'صيغة الرمز غير صالحة' }, { status: 400 });
+      }
+
+      const session = await db.getSession(code);
       if (!session) {
         return NextResponse.json({ error: 'الجلسة غير موجودة أو انتهى وقتها' }, { status: 404 });
       }
 
       // If link was sent
       if (linkUrl) {
-        db.updateSession(code, {
+        // Validate URL format
+        try {
+          const parsed = new URL(linkUrl);
+          if (!['http:', 'https:'].includes(parsed.protocol)) {
+            return NextResponse.json({ error: 'صيغة الرابط غير صالحة' }, { status: 400 });
+          }
+        } catch {
+          return NextResponse.json({ error: 'صيغة الرابط غير صالحة' }, { status: 400 });
+        }
+
+        await db.updateSession(code, {
           linkUrl: linkUrl,
           status: 'ready',
         });
         return NextResponse.json({ success: true, message: 'تم إرسال الرابط بنجاح' });
       }
 
-      // If file was sent — store as base64 in memory
+      // If file was sent — upload to Supabase Storage
       if (file) {
-        const buffer = Buffer.from(await file.arrayBuffer());
-        const base64Data = buffer.toString('base64');
+        // Validate file size
+        if (file.size > MAX_FILE_SIZE) {
+          return NextResponse.json(
+            { error: 'حجم الملف يتجاوز الحد المسموح (50 ميجابايت)' },
+            { status: 400 }
+          );
+        }
 
-        db.updateSession(code, {
-          fileData: base64Data,
+        // Validate MIME type
+        if (!isAllowedMimeType(file.type)) {
+          return NextResponse.json(
+            { error: 'نوع الملف غير مسموح به' },
+            { status: 400 }
+          );
+        }
+
+        // Generate a unique filename to prevent path traversal and collisions
+        const fileExt = file.name.split('.').pop()?.replace(/[^a-zA-Z0-9]/g, '') || 'bin';
+        const uniqueName = `${crypto.randomUUID()}.${fileExt}`;
+        const storagePath = `${code}/${uniqueName}`;
+
+        const fileBuffer = Buffer.from(await file.arrayBuffer());
+
+        // Upload to Supabase Storage bucket "uploads"
+        const { error: uploadError } = await supabase.storage
+          .from('uploads')
+          .upload(storagePath, fileBuffer, {
+            contentType: file.type,
+            upsert: false,
+          });
+
+        if (uploadError) {
+          console.error('Supabase storage upload error:', uploadError.message);
+          return NextResponse.json(
+            { error: 'فشل رفع الملف إلى التخزين السحابي' },
+            { status: 500 }
+          );
+        }
+
+        // Get the public URL for the uploaded file
+        const { data: publicUrlData } = supabase.storage
+          .from('uploads')
+          .getPublicUrl(storagePath);
+
+        await db.updateSession(code, {
           fileName: file.name,
           fileType: file.type,
           fileSize: file.size,
-          fileUrl: `/api/wamda?action=download&code=${code}`,
+          fileUrl: publicUrlData.publicUrl,
           status: 'ready',
         });
 
@@ -86,8 +164,13 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ error: 'الرمز مطلوب' }, { status: 400 });
       }
 
+      // Validate PIN format
+      if (!/^\d{6}$/.test(code)) {
+        return NextResponse.json({ error: 'صيغة الرمز غير صالحة' }, { status: 400 });
+      }
+
       const join = searchParams.get('join') === 'true';
-      const session = db.getSession(code);
+      const session = await db.getSession(code);
 
       if (!session) {
         return NextResponse.json({ error: 'الجلسة غير موجودة أو انتهت صلاحيتها' }, { status: 404 });
@@ -95,42 +178,44 @@ export async function GET(req: NextRequest) {
 
       // If receiver is joining a group, increment client count
       if (join && session.type === 'group') {
-        const updated = db.updateSession(code, {
+        const updated = await db.updateSession(code, {
           clientCount: session.clientCount + 1,
         });
         return NextResponse.json(updated);
       }
 
-      // Don't expose fileData in status response
-      const { fileData, ...safeSession } = session;
-      return NextResponse.json(safeSession);
+      return NextResponse.json(session);
     }
 
-    // --- ACTION: download file ---
+    // --- ACTION: download file (redirect to Supabase Storage public URL) ---
     if (action === 'download') {
       if (!code) {
         return NextResponse.json({ error: 'معلمات غير صالحة' }, { status: 400 });
       }
 
-      const session = db.getSession(code);
-      if (!session || !session.fileData) {
+      // Validate PIN format
+      if (!/^\d{6}$/.test(code)) {
+        return NextResponse.json({ error: 'صيغة الرمز غير صالحة' }, { status: 400 });
+      }
+
+      const session = await db.getSession(code);
+      if (!session || !session.fileUrl) {
         return NextResponse.json({ error: 'الملف غير موجود أو انتهت صلاحية تحميله' }, { status: 404 });
       }
 
-      const fileBuffer = Buffer.from(session.fileData, 'base64');
-
-      // For individual sessions, delete after download
+      // For individual sessions, clean up after download
       if (session.type === 'individual') {
-        db.deleteSession(code);
+        // Delete storage file and session record
+        // TODO(security): Consider doing cleanup asynchronously to not block the response
+        const filePathMatch = session.fileUrl.match(/uploads\/(.+)$/);
+        if (filePathMatch) {
+          await supabase.storage.from('uploads').remove([filePathMatch[1]]);
+        }
+        await db.deleteSession(code);
       }
 
-      return new NextResponse(fileBuffer, {
-        headers: {
-          'Content-Type': session.fileType || 'application/octet-stream',
-          'Content-Disposition': `attachment; filename="${encodeURIComponent(session.fileName || 'file')}"`,
-          'Content-Length': fileBuffer.length.toString(),
-        },
-      });
+      // Redirect to the Supabase Storage public URL
+      return NextResponse.redirect(session.fileUrl);
     }
 
     return NextResponse.json({ error: 'إجراء غير معروف' }, { status: 400 });

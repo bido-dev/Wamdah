@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { supabase } from '@/lib/supabase';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 
 interface GroupPanelProps {
   onBack: () => void;
@@ -40,20 +42,21 @@ export default function GroupPanel({ onBack }: GroupPanelProps) {
   const [loading, setLoading] = useState(false);
   const [origin, setOrigin] = useState('');
 
-  const pollingRef = useRef<NodeJS.Timeout | null>(null);
+  const channelRef = useRef<RealtimeChannel | null>(null);
   const inputRefs = useRef<HTMLInputElement[]>([]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setOrigin(window.location.origin);
     }
-    return () => stopPolling();
+    return () => unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const stopPolling = () => {
-    if (pollingRef.current) {
-      clearInterval(pollingRef.current);
-      pollingRef.current = null;
+  const unsubscribe = () => {
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current);
+      channelRef.current = null;
     }
   };
 
@@ -74,25 +77,38 @@ export default function GroupPanel({ onBack }: GroupPanelProps) {
       setRole('sender');
       setLoading(false);
 
-      // فحص دوري لتحديث عدد الطلاب المتصلين بالرمز
-      startSenderPolling(data.code);
-    } catch (err: any) {
-      setError(err.message || 'حدث خطأ أثناء إنشاء المجموعة');
+      // الاستماع اللحظي لتحديث عدد الطلاب المتصلين
+      subscribeSender(data.code);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'حدث خطأ أثناء إنشاء المجموعة';
+      setError(message);
       setLoading(false);
     }
   };
 
-  const startSenderPolling = (code: string) => {
-    pollingRef.current = setInterval(async () => {
-      try {
-        const res = await fetch(`/api/wamda?action=status&code=${code}`);
-        if (!res.ok) return;
-        const data: SessionData = await res.json();
-        setGroupSession(data);
-      } catch (err) {
-        console.error('Error polling group status:', err);
-      }
-    }, 2000); // تحديث عدد المتصلين كل ثانيتين
+  const subscribeSender = (code: string) => {
+    const channel = supabase
+      .channel(`group-sender-${code}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'sessions',
+          filter: `pin_code=eq.${code}`,
+        },
+        (payload) => {
+          const row = payload.new as Record<string, unknown>;
+          setGroupSession(prev => prev ? {
+            ...prev,
+            clientCount: (row.client_count as number) ?? prev.clientCount,
+            status: (row.status as 'waiting' | 'ready' | 'downloaded') ?? prev.status,
+          } : null);
+        }
+      )
+      .subscribe();
+
+    channelRef.current = channel;
   };
 
   const handleSenderSubmit = async () => {
@@ -136,9 +152,10 @@ export default function GroupPanel({ onBack }: GroupPanelProps) {
 
       setUploadProgress(100);
       setSenderSuccess(true);
-      stopPolling();
-    } catch (err: any) {
-      setError(err.message || 'حدث خطأ في الإرسال');
+      unsubscribe();
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'حدث خطأ في الإرسال';
+      setError(message);
       setUploading(false);
     }
   };
@@ -201,28 +218,49 @@ export default function GroupPanel({ onBack }: GroupPanelProps) {
       setRole('receiver');
       setLoading(false);
 
-      // بدء الفحص الدوري لانتظار الملف من المعلم/المرسل
-      startReceiverPolling(data.code);
-    } catch (err: any) {
-      setError(err.message);
+      // إذا كان الملف جاهزاً بالفعل، لا حاجة للاستماع
+      if (data.status !== 'ready') {
+        subscribeReceiver(data.code);
+      }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'حدث خطأ';
+      setError(message);
       setLoading(false);
     }
   };
 
-  const startReceiverPolling = (code: string) => {
-    pollingRef.current = setInterval(async () => {
-      try {
-        const res = await fetch(`/api/wamda?action=status&code=${code}`);
-        if (!res.ok) return;
-        const data: SessionData = await res.json();
-        if (data.status === 'ready') {
-          setJoinedSession(data);
-          stopPolling(); // تم استلام الملف بنجاح
+  const subscribeReceiver = (code: string) => {
+    const channel = supabase
+      .channel(`group-receiver-${code}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'sessions',
+          filter: `pin_code=eq.${code}`,
+        },
+        (payload) => {
+          const row = payload.new as Record<string, unknown>;
+          if (row.status === 'ready') {
+            setJoinedSession({
+              code: row.pin_code as string,
+              type: 'group',
+              status: 'ready',
+              fileUrl: (row.file_url as string) ?? undefined,
+              fileName: (row.file_name as string) ?? undefined,
+              fileType: (row.file_type as string) ?? undefined,
+              fileSize: (row.file_size as number) ?? undefined,
+              linkUrl: (row.link_url as string) ?? undefined,
+              clientCount: (row.client_count as number) ?? 0,
+            });
+            unsubscribe();
+          }
         }
-      } catch (err) {
-        console.error('Error polling group receive:', err);
-      }
-    }, 1500);
+      )
+      .subscribe();
+
+    channelRef.current = channel;
   };
 
   const formatFileSize = (bytes?: number) => {
@@ -235,7 +273,7 @@ export default function GroupPanel({ onBack }: GroupPanelProps) {
 
   return (
     <div className="panel-container" style={{ maxWidth: '750px' }}>
-      <button className="back-button" onClick={() => { stopPolling(); onBack(); }}>
+      <button className="back-button" onClick={() => { unsubscribe(); onBack(); }}>
         &rarr; العودة للرئيسية
       </button>
 
@@ -372,7 +410,7 @@ export default function GroupPanel({ onBack }: GroupPanelProps) {
               <div className="success-icon">✓</div>
               <h3 className="success-title">تم البث للجميع!</h3>
               <p style={{ color: 'var(--ksu-text-muted)', marginBottom: '1.5rem' }}>
-                تم رفع محتوى البث وسيكون متاحاً لجميع المشتركين لمدة 5 دقائق قبل حذفه تلقائياً.
+                تم رفع محتوى البث وسيكون متاحاً لجميع المشتركين لمدة ساعتين قبل حذفه تلقائياً.
               </p>
               <button className="wamda-btn btn-secondary" onClick={onBack}>
                 إنهاء البث والعودة
@@ -470,7 +508,7 @@ export default function GroupPanel({ onBack }: GroupPanelProps) {
 
               {receiverSuccess && (
                 <p style={{ color: 'var(--ksu-success)', fontWeight: 'bold', marginTop: '1rem' }}>
-                  تم حفظ الملف بنجاح! سيتم تنظيف الخوادم دورياً كل 5 دقائق.
+                  تم حفظ الملف بنجاح! سيتم تنظيف الخوادم دورياً كل ساعتين.
                 </p>
               )}
             </div>
