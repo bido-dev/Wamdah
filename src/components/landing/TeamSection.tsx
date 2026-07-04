@@ -5,19 +5,19 @@ const teamMembers = [
     name: 'Bilal Zakkar',
     role: 'CEO',
     image: '/assets/team1.png',
-    variant: 'pink',
+    variant: 'purple',
   },
   {
     name: 'Abdalla Ammar',
     role: 'CTO',
     image: '/assets/team2.png',
-    variant: 'yellow',
+    variant: 'sky',
   },
   {
     name: 'Sulaiman Mokhaniq',
     role: 'Web Designer',
     image: '/assets/team3.png',
-    variant: 'navy',
+    variant: 'teal',
   },
 ];
 
@@ -28,13 +28,12 @@ export default function TeamSection() {
         <div className="team-cards">
           {teamMembers.map((member) => (
             <div key={member.name} className={`team-card team-card-${member.variant}`}>
-              <div className="team-card-shape" aria-hidden="true" />
               <div className="team-card-photo">
                 <Image
                   src={member.image}
                   alt={member.name}
-                  width={280}
-                  height={360}
+                  width={200}
+                  height={200}
                   className="team-photo-img"
                 />
               </div>
@@ -46,11 +45,6 @@ export default function TeamSection() {
           ))}
         </div>
       </div>
-
-      <footer className="landing-footer">
-        <p>جامعة الملك سعود | كلية علوم الحاسب والمعلومات</p>
-        <p>جميع الحقوق محفوظة لمشروع ومضة &copy; {new Date().getFullYear()}</p>
-      </footer>
     </section>
   );
 }

@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import Footer from '@/components/Footer';
 import SendPanel from '@/components/SendPanel';
 import ReceivePanel from '@/components/ReceivePanel';
 import GroupPanel from '@/components/GroupPanel';
@@ -52,7 +51,6 @@ export default function AppPage() {
       >
         <WamdaContent />
       </Suspense>
-      <Footer />
     </div>
   );
 }
