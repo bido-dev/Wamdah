@@ -724,23 +724,23 @@
 .team-card-photo {
   position: relative;
   z-index: 1;
-  margin-top: -110px;
-  margin-bottom: -10px;
+  height: 280px;
+  margin-bottom: 60px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
 }
 
 .team-photo-img {
-  width: 100%;
+  width: auto;
+  max-width: 85%;
   height: auto;
-  max-height: 320px;
-  object-fit: cover;
-  object-position: top center;
+  max-height: 250px;
+  object-fit: contain;
+  margin-bottom: 15px;
   filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.2));
 }
 
-.team-card-sky .team-photo-img {
-  transform: scale(1.35);
-  transform-origin: bottom center;
-}
 
 .team-card-info {
   position: absolute;
