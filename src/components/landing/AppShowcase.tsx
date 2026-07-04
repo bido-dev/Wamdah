@@ -2,31 +2,102 @@
 
 import { useState, useEffect } from 'react';
 
-import Image from 'next/image';
-
 const screens = [
   {
-    id: 'home',
-    src: '/assets/app-home.png',
+    id: 'profile',
+    header: 'linear-gradient(135deg, #662D91, #29ABE2)',
+    content: 'profile',
   },
   {
-    id: 'send',
-    src: '/assets/app-send.png',
+    id: 'list',
+    header: 'linear-gradient(135deg, #7B3FA0, #00AEEF)',
+    content: 'list',
   },
   {
-    id: 'receive',
-    src: '/assets/app-receive.png',
+    id: 'dashboard',
+    header: 'linear-gradient(135deg, #662D91, #D4145A)',
+    content: 'dashboard',
     featured: true,
   },
   {
-    id: 'group',
-    src: '/assets/app-group.png',
+    id: 'media',
+    header: 'linear-gradient(135deg, #29ABE2, #662D91)',
+    content: 'media',
   },
   {
-    id: 'success',
-    src: '/assets/app-success.png',
+    id: 'chat',
+    header: 'linear-gradient(135deg, #00AEEF, #7B3FA0)',
+    content: 'chat',
   },
 ];
+
+function PhoneScreen({ content, header }: { content: string; header: string }) {
+  return (
+    <div className="phone-screen-inner">
+      <div className="phone-notch" />
+      <div className="phone-header" style={{ background: header }}>
+        <div className="phone-header-icons">
+          <span />
+          <span />
+          <span />
+        </div>
+      </div>
+      <div className={`phone-body phone-body-${content}`}>
+        {content === 'profile' && (
+          <>
+            <div className="phone-avatar" />
+            <div className="phone-line phone-line-lg" />
+            <div className="phone-line phone-line-md" />
+            <div className="phone-line phone-line-sm" />
+          </>
+        )}
+        {content === 'list' && (
+          <>
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="phone-list-item">
+                <div className="phone-list-avatar" />
+                <div className="phone-list-lines">
+                  <div className="phone-line phone-line-md" />
+                  <div className="phone-line phone-line-sm" />
+                </div>
+              </div>
+            ))}
+          </>
+        )}
+        {content === 'dashboard' && (
+          <>
+            <div className="phone-chart">
+              <svg viewBox="0 0 200 80" preserveAspectRatio="none">
+                <path d="M0,60 Q50,20 100,45 T200,15" fill="none" stroke="#29ABE2" strokeWidth="3" />
+                <path d="M0,70 Q50,40 100,55 T200,35" fill="none" stroke="#D4145A" strokeWidth="3" />
+                <path d="M0,50 Q50,10 100,35 T200,25" fill="none" stroke="#D9E021" strokeWidth="3" />
+              </svg>
+            </div>
+            <div className="phone-stats-row">
+              <div className="phone-stat-box" />
+              <div className="phone-stat-box" />
+              <div className="phone-stat-box" />
+            </div>
+          </>
+        )}
+        {content === 'media' && (
+          <>
+            <div className="phone-media-image" />
+            <div className="phone-line phone-line-lg" />
+            <div className="phone-line phone-line-md" />
+          </>
+        )}
+        {content === 'chat' && (
+          <>
+            <div className="phone-bubble phone-bubble-left" />
+            <div className="phone-bubble phone-bubble-right" />
+            <div className="phone-bubble phone-bubble-left phone-bubble-short" />
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function AppShowcase() {
   const [activeIndex, setActiveIndex] = useState(2);
@@ -57,13 +128,7 @@ export default function AppShowcase() {
                 className={`phone-mockup ${index === activeIndex ? 'phone-mockup-active' : ''} ${screen.featured ? 'phone-mockup-featured' : ''}`}
                 onClick={() => setActiveIndex(index)}
               >
-                <Image
-                  src={screen.src}
-                  alt={`Wamdah UI Screen - ${screen.id}`}
-                  width={240}
-                  height={500}
-                  style={{ width: '100%', height: 'auto', borderRadius: '24px', boxShadow: '0 12px 40px rgba(0, 0, 0, 0.2)' }}
-                />
+                <PhoneScreen content={screen.content} header={screen.header} />
               </div>
             ))}
           </div>
