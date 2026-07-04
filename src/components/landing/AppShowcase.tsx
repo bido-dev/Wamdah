@@ -7,24 +7,24 @@ import Image from 'next/image';
 const screens = [
   {
     id: 'home',
-    src: '/assets/app-home.png',
+    path: '/app',
   },
   {
     id: 'send',
-    src: '/assets/app-send.png',
+    path: '/app?mode=send',
   },
   {
     id: 'receive',
-    src: '/assets/app-receive.png',
+    path: '/app?mode=receive',
     featured: true,
   },
   {
     id: 'group',
-    src: '/assets/app-group.png',
+    path: '/app?group=1',
   },
   {
     id: 'success',
-    src: '/assets/app-success.png',
+    path: '/app',
   },
 ];
 
@@ -57,12 +57,20 @@ export default function AppShowcase() {
                 className={`phone-mockup ${index === activeIndex ? 'phone-mockup-active' : ''} ${screen.featured ? 'phone-mockup-featured' : ''}`}
                 onClick={() => setActiveIndex(index)}
               >
-                <Image
-                  src={screen.src}
-                  alt={`Wamdah UI Screen - ${screen.id}`}
-                  width={240}
-                  height={500}
-                  style={{ width: '100%', height: 'auto', borderRadius: '24px', boxShadow: '0 12px 40px rgba(0, 0, 0, 0.2)' }}
+                <iframe
+                  src={screen.path}
+                  title={`Wamdah UI Screen - ${screen.id}`}
+                  style={{
+                    width: '320px',
+                    height: '600px',
+                    border: 'none',
+                    borderRadius: '24px',
+                    boxShadow: '0 12px 40px rgba(0, 0, 0, 0.2)',
+                    backgroundColor: 'white',
+                    pointerEvents: index === activeIndex ? 'auto' : 'none',
+                    overflow: 'hidden'
+                  }}
+                  sandbox="allow-scripts allow-same-origin allow-forms"
                 />
               </div>
             ))}
