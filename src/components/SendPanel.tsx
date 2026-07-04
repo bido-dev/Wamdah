@@ -4,10 +4,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 
 interface SendPanelProps {
+  initialCode?: string;
   onBack: () => void;
 }
 
-export default function SendPanel({ onBack }: SendPanelProps) {
+export default function SendPanel({ initialCode, onBack }: SendPanelProps) {
   const [code, setCode] = useState<string[]>(Array(6).fill(''));
   const [error, setError] = useState<string | null>(null);
   const [sessionVerified, setSessionVerified] = useState(false);
@@ -57,8 +58,8 @@ export default function SendPanel({ onBack }: SendPanelProps) {
   };
 
   // التحقق من الرمز المدخل
-  const verifyCode = async () => {
-    const fullCode = code.join('');
+  const verifyCode = async (customCode?: string) => {
+    const fullCode = customCode || code.join('');
     if (fullCode.length !== 6) {
       setError('الرجاء إدخال الرمز المكون من 6 أرقام كاملاً');
       return;
@@ -79,6 +80,14 @@ export default function SendPanel({ onBack }: SendPanelProps) {
       setError(err.message || 'فشل التحقق من الرمز. حاول مرة أخرى.');
     }
   };
+
+  useEffect(() => {
+    if (initialCode && /^\d{6}$/.test(initialCode)) {
+      setCode(initialCode.split(''));
+      verifyCode(initialCode);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialCode]);
 
   // معالجة اختيار الملفات
   const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
@@ -222,7 +231,7 @@ export default function SendPanel({ onBack }: SendPanelProps) {
             ))}
           </div>
 
-          <button className="wamda-btn btn-primary" onClick={verifyCode}>
+          <button className="wamda-btn btn-primary" onClick={() => verifyCode()}>
             الاتصال والتحقق من الرمز &larr;
           </button>
         </div>

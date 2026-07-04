@@ -30,9 +30,9 @@ function WamdaContent() {
 
   return (
     <main className="app-main">
-      {activeMode === 'send' && <SendPanel onBack={() => router.push('/')} />}
+      {activeMode === 'send' && <SendPanel initialCode={searchParams.get('send') || undefined} onBack={() => router.push('/')} />}
       {activeMode === 'receive' && <ReceivePanel onBack={() => router.push('/')} />}
-      {activeMode === 'group' && <GroupPanel onBack={() => router.push('/')} />}
+      {activeMode === 'group' && <GroupPanel initialCode={searchParams.get('group') || undefined} onBack={() => router.push('/')} />}
     </main>
   );
 }

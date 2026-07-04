@@ -404,9 +404,10 @@ body {
 /* حقول إدخال الرمز المكون من 6 أرقام */
 .pin-input-container {
   display: flex;
+  flex-direction: row !important;
   justify-content: center;
   gap: 10px;
-  direction: ltr;
+  direction: ltr !important;
   margin-bottom: 2rem;
 }
 
@@ -421,6 +422,7 @@ body {
   color: var(--ksu-blue);
   background: #f0f8ff;
   outline: none;
+  direction: ltr !important;
   transition: var(--transition-fast);
 }
 

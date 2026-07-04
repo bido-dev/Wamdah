@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
 interface GroupPanelProps {
+  initialCode?: string;
   onBack: () => void;
 }
 
@@ -20,7 +21,7 @@ interface SessionData {
   clientCount: number;
 }
 
-export default function GroupPanel({ onBack }: GroupPanelProps) {
+export default function GroupPanel({ initialCode, onBack }: GroupPanelProps) {
   const [role, setRole] = useState<'sender' | 'receiver' | null>(null);
   
   // خاص بالمرسل (إنشاء المجموعة)
@@ -232,8 +233,8 @@ export default function GroupPanel({ onBack }: GroupPanelProps) {
     inputRefs.current[5]?.focus();
   };
 
-  const handleJoinGroup = async () => {
-    const fullCode = pinCode.join('');
+  const handleJoinGroup = async (customCode?: string) => {
+    const fullCode = customCode || pinCode.join('');
     if (fullCode.length !== 6) {
       setError('الرجاء إدخال الرمز المكون من 6 أرقام كاملاً');
       return;
@@ -269,6 +270,14 @@ export default function GroupPanel({ onBack }: GroupPanelProps) {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (initialCode && /^\d{6}$/.test(initialCode)) {
+      setPinCode(initialCode.split(''));
+      handleJoinGroup(initialCode);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialCode]);
 
   const subscribeReceiver = (code: string) => {
     const channel = supabase
@@ -362,7 +371,7 @@ export default function GroupPanel({ onBack }: GroupPanelProps) {
               <div className="qr-code-wrapper">
                 <img
                   src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
-                    `${origin}?group=${groupSession.code}`
+                    `${origin}/app?group=${groupSession.code}`
                   )}`}
                   alt="QR Code Scan to Join Group"
                   width={150}
@@ -481,7 +490,7 @@ export default function GroupPanel({ onBack }: GroupPanelProps) {
             ))}
           </div>
 
-          <button className="wamda-btn btn-primary" onClick={handleJoinGroup} disabled={loading}>
+          <button className="wamda-btn btn-primary" onClick={() => handleJoinGroup()} disabled={loading}>
             {loading ? 'جاري الاتصال بالمجموعة...' : 'الانضمام واستقبال البث 👥'}
           </button>
         </div>

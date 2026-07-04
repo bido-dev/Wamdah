@@ -162,7 +162,7 @@ export default function ReceivePanel({ onBack }: ReceivePanelProps) {
               <div className="qr-code-wrapper">
                 <img
                   src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
-                    `${origin}?send=${session.code}`
+                    `${origin}/app?send=${session.code}`
                   )}`}
                   alt="QR Code Scan to Send"
                   width={180}
