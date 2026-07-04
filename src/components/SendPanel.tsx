@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 
 interface SendPanelProps {
@@ -214,7 +215,9 @@ export default function SendPanel({ initialCode, onBack }: SendPanelProps) {
       </button>
 
       <div className="panel-header">
-        <div className="panel-header-icon">📤</div>
+        <div className="panel-header-icon" style={{ background: 'transparent' }}>
+          <Image src="/assets/send.png" alt="Send Icon" width={48} height={48} />
+        </div>
         <h2 className="panel-title">إرسال ملف أو رابط</h2>
         <p className="panel-desc">
           {!sessionVerified
@@ -281,7 +284,9 @@ export default function SendPanel({ initialCode, onBack }: SendPanelProps) {
                 onDrop={handleFileDrop}
                 onClick={() => inputRefs.current[6]?.click()}
               >
-                <div className="upload-icon">📥</div>
+                <div className="upload-icon" style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+                  <Image src="/assets/files.png" alt="Upload Icon" width={48} height={48} />
+                </div>
                 <div>
                   <p style={{ fontWeight: 'bold' }}>اسحب الملفات وأفلتها هنا أو اضغط للاختيار</p>
                   <p style={{ fontSize: '0.8rem', color: 'var(--ksu-text-muted)', marginTop: '5px' }}>

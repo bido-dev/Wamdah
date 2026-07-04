@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import SendPanel from '@/components/SendPanel';
 import ReceivePanel from '@/components/ReceivePanel';
 import GroupPanel from '@/components/GroupPanel';
