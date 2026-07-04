@@ -40,7 +40,7 @@ html,
 body {
   height: 100%;
   font-family: var(--font-cairo), Cairo, system-ui, -apple-system, sans-serif;
-  background: linear-gradient(160deg, #f0f8ff 0%, #e8f4fb 50%, #f5f9fc 100%);
+  background: var(--ksu-white);
   color: var(--ksu-text-dark);
   line-height: 1.6;
   overflow-x: hidden;
@@ -50,7 +50,7 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: linear-gradient(160deg, #f0f8ff 0%, #e8f4fb 50%, #f5f9fc 100%);
+  background: var(--ksu-white);
 }
 
 /* الرأس - الهيدر */
@@ -391,6 +391,7 @@ body {
   margin-bottom: 0.4rem;
   background: var(--ksu-gradient);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 

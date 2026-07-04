@@ -2,19 +2,19 @@ import Image from 'next/image';
 
 const teamMembers = [
   {
-    name: 'Andrey David',
+    name: 'Bilal Zakkar',
     role: 'CEO',
     image: '/assets/team1.png',
     variant: 'pink',
   },
   {
-    name: 'Steven London',
+    name: 'Abdalla Ammar',
     role: 'CTO',
     image: '/assets/team2.png',
     variant: 'yellow',
   },
   {
-    name: 'Ali Josephine',
+    name: 'Sulaiman Mokhaniq',
     role: 'Web Designer',
     image: '/assets/team3.png',
     variant: 'navy',

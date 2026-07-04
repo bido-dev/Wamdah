@@ -9,7 +9,6 @@ import './landing.css';
 export default function Home() {
   return (
     <div className="landing-page">
-      <LandingNav />
       <HeroSection />
       <WaveDivider variant="hero-bottom" />
       <AppShowcase />

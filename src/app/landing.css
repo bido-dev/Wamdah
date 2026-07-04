@@ -69,6 +69,7 @@
   font-weight: 800;
   background: var(--landing-gradient);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -217,7 +218,7 @@
   width: 100%;
   max-width: 100%;
   margin: 0;
-  padding: 9rem 42% 6rem 4rem;
+  padding: 6rem 42% 6rem 4rem;
 }
 
 .hero-content {
@@ -240,6 +241,7 @@
 .hero-brand {
   background: var(--landing-gradient);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
