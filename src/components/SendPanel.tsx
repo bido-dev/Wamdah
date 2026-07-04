@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
 
 interface SendPanelProps {
   onBack: () => void;
@@ -110,27 +111,68 @@ export default function SendPanel({ onBack }: SendPanelProps) {
     setUploadProgress(10);
 
     try {
-      const formData = new FormData();
-      formData.append('code', fullCode);
+      if (activeTab === 'link') {
+        const res = await fetch('/api/wamda?action=upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            code: fullCode,
+            link: linkUrl,
+          }),
+        });
 
-      if (activeTab === 'file' && selectedFile) {
-        formData.append('file', selectedFile);
-      } else if (activeTab === 'link') {
-        formData.append('link', linkUrl);
-      }
+        setUploadProgress(85);
 
-      setUploadProgress(40);
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.error || 'حدث خطأ أثناء إرسال الرابط');
+        }
+      } else if (activeTab === 'file' && selectedFile) {
+        // Upload directly to Supabase storage from the client
+        const fileExt = selectedFile.name.split('.').pop()?.replace(/[^a-zA-Z0-9]/g, '') || 'bin';
+        const uniqueName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+        const storagePath = `${fullCode}/${uniqueName}`;
 
-      const res = await fetch('/api/wamda?action=upload', {
-        method: 'POST',
-        body: formData,
-      });
+        setUploadProgress(30);
 
-      setUploadProgress(80);
+        // Upload using Supabase JS client
+        const { error: uploadError } = await supabase.storage
+          .from('uploads')
+          .upload(storagePath, selectedFile, {
+            cacheControl: '3600',
+            upsert: false,
+          });
 
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.error || 'حدث خطأ أثناء رفع المحتوى');
+        if (uploadError) {
+          throw new Error('فشل رفع الملف إلى التخزين السحابي: ' + uploadError.message);
+        }
+
+        setUploadProgress(70);
+
+        // Get public URL
+        const { data: publicUrlData } = supabase.storage
+          .from('uploads')
+          .getPublicUrl(storagePath);
+        
+        const fileUrl = publicUrlData.publicUrl;
+
+        // Post metadata to server
+        const res = await fetch('/api/wamda?action=upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            code: fullCode,
+            fileUrl,
+            fileName: selectedFile.name,
+            fileType: selectedFile.type,
+            fileSize: selectedFile.size,
+          }),
+        });
+
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.error || 'حدث خطأ أثناء حفظ بيانات الملف');
+        }
       }
 
       setUploadProgress(100);

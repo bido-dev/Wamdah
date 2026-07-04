@@ -47,10 +47,29 @@ export async function POST(req: NextRequest) {
 
     // --- ACTION: upload file or link ---
     if (action === 'upload') {
-      const formData = await req.formData();
-      const code = formData.get('code') as string;
-      const linkUrl = formData.get('link') as string;
-      const file = formData.get('file') as File | null;
+      const contentType = req.headers.get('content-type') || '';
+      let code = '';
+      let linkUrl: string | null = null;
+      let file: File | null = null;
+      let directFileUrl: string | null = null;
+      let directFileName: string | null = null;
+      let directFileType: string | null = null;
+      let directFileSize: number | null = null;
+
+      if (contentType.includes('application/json')) {
+        const body = await req.json();
+        code = body.code || '';
+        linkUrl = body.link || null;
+        directFileUrl = body.fileUrl || null;
+        directFileName = body.fileName || null;
+        directFileType = body.fileType || null;
+        directFileSize = body.fileSize || null;
+      } else {
+        const formData = await req.formData();
+        code = (formData.get('code') as string) || '';
+        linkUrl = formData.get('link') as string;
+        file = formData.get('file') as File | null;
+      }
 
       if (!code) {
         return NextResponse.json({ error: 'رمز الاتصال مطلوب' }, { status: 400 });
@@ -85,7 +104,33 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: true, message: 'تم إرسال الرابط بنجاح' });
       }
 
-      // If file was sent — upload to Supabase Storage
+      // If direct uploaded file details were sent
+      if (directFileUrl) {
+        if (directFileType && !isAllowedMimeType(directFileType)) {
+          return NextResponse.json(
+            { error: 'نوع الملف غير مسموح به' },
+            { status: 400 }
+          );
+        }
+        if (directFileSize && directFileSize > MAX_FILE_SIZE) {
+          return NextResponse.json(
+            { error: 'حجم الملف يتجاوز الحد المسموح (50 ميجابايت)' },
+            { status: 400 }
+          );
+        }
+
+        await db.updateSession(code, {
+          fileName: directFileName || 'file',
+          fileType: directFileType || 'application/octet-stream',
+          fileSize: directFileSize || 0,
+          fileUrl: directFileUrl,
+          status: 'ready',
+        });
+
+        return NextResponse.json({ success: true, message: 'تم رفع الملف بنجاح' });
+      }
+
+      // If file was sent (fallback direct API upload) — upload to Supabase Storage
       if (file) {
         // Validate file size
         if (file.size > MAX_FILE_SIZE) {
