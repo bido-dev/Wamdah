@@ -45,6 +45,7 @@ export default function GroupPanel({ initialCode, onBack }: GroupPanelProps) {
 
   const channelRef = useRef<RealtimeChannel | null>(null);
   const inputRefs = useRef<HTMLInputElement[]>([]);
+  const creationCalledRef = useRef(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -275,8 +276,11 @@ export default function GroupPanel({ initialCode, onBack }: GroupPanelProps) {
     if (initialCode && /^\d{6}$/.test(initialCode)) {
       setPinCode(initialCode.split(''));
       handleJoinGroup(initialCode);
-    } else if (!initialCode) {
-      handleCreateGroup();
+    } else {
+      if (!creationCalledRef.current) {
+        creationCalledRef.current = true;
+        handleCreateGroup();
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialCode]);
