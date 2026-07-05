@@ -584,27 +584,35 @@ body {
   margin-bottom: 2rem;
 }
 
-.code-numbers {
-  font-size: 3.2rem;
-  font-weight: 800;
-  color: var(--ksu-navy);
-  letter-spacing: 6px;
-  background-color: var(--ksu-gray-light);
-  padding: 0.5rem 2rem;
-  border-radius: var(--radius-md);
-  border: 2px dashed var(--ksu-gold);
-  text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.8);
-  font-variant-numeric: tabular-nums;
-  cursor: pointer;
-  position: relative;
+.code-digits-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
   direction: ltr !important;
-  display: inline-block !important;
-  unicode-bidi: bidi-override !important;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
   transition: var(--transition-fast);
 }
 
-.code-numbers:hover {
-  transform: scale(1.03);
+.code-digits-container:hover {
+  transform: scale(1.05);
+}
+
+.code-digit-underline {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--ksu-navy);
+  padding: 0 4px;
+  border-bottom: 3px solid #0085BE;
+  font-variant-numeric: tabular-nums;
+  display: inline-block;
+  line-height: 1.1;
+  text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.8);
+}
+
+.code-digit-space {
+  width: 24px;
 }
 
 .qr-code-wrapper {
@@ -612,7 +620,53 @@ body {
   padding: 16px;
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
-  border: 1px solid var(--ksu-gray-medium);
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* طبقة الإطار المتحرك كخط يجري حول الأضلاع */
+.qr-code-wrapper::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0%,
+    transparent 40%,
+    #0085BE 50%,
+    var(--ksu-sky) 60%,
+    transparent 70%,
+    transparent 100%
+  );
+  animation: qrBorderDrawLoop 2s linear infinite;
+  z-index: -2;
+}
+
+/* خلفية بيضاء داخلية لحماية صورة الـ QR والحفاظ على الحدود */
+.qr-code-wrapper::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  right: 3px;
+  bottom: 3px;
+  background: var(--ksu-white);
+  border-radius: calc(var(--radius-md) - 3px);
+  z-index: -1;
+}
+
+@keyframes qrBorderDrawLoop {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .waiting-pulse-container {

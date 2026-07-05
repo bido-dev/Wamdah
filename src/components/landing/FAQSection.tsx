@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 
 const faqItems = [
   {
@@ -21,7 +22,7 @@ const faqItems = [
   {
     question: 'كيف تعمل المجموعات؟',
     answer:
-      'يمكن للمحاضر إنشاء مجموعة بث لإرسال ملف واحد إلى عدة طلاب في آن واحد، أو للطلاب الانضمام لمجموعة نشطة لتنزيل الملفات دفعة واحدة.',
+      'يمكن للمحاضر إنشاء مجموعة بث إرسال ملف واحد إلى عدة طلاب في آن واحد، أو للطلاب الانضمام لمجموعة نشطة لتنزيل الملفات دفعة واحدة.',
   },
   {
     question: 'هل البيانات آمنة؟',
@@ -30,32 +31,17 @@ const faqItems = [
   },
 ];
 
-function MegaphoneIllustration() {
+function FAQIllustration() {
   return (
-    <div className="faq-illustration">
+    <div className="faq-illustration" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
       <div className="faq-illustration-glow" />
-      <div className="faq-float-icon faq-float-q">?</div>
-      <div className="faq-float-icon faq-float-chat">💬</div>
-      <div className="faq-float-icon faq-float-star">★</div>
-      <svg className="faq-megaphone" viewBox="0 0 120 120" fill="none" aria-hidden="true">
-        <defs>
-          <linearGradient id="megaphoneGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#29ABE2" />
-            <stop offset="100%" stopColor="#662D91" />
-          </linearGradient>
-        </defs>
-        <path
-          d="M25 55 L55 40 L55 80 L25 65 Z"
-          fill="url(#megaphoneGrad)"
-        />
-        <path
-          d="M55 40 C75 30 95 35 100 60 C95 85 75 90 55 80 Z"
-          fill="url(#megaphoneGrad)"
-          opacity="0.85"
-        />
-        <rect x="18" y="52" width="12" height="16" rx="3" fill="#662D91" />
-        <path d="M100 55 L115 48 L115 72 L100 65 Z" fill="#29ABE2" opacity="0.6" />
-      </svg>
+      <Image 
+        src="/assets/faq.png" 
+        alt="FAQ Illustration" 
+        width={220} 
+        height={220} 
+        style={{ objectFit: 'contain', zIndex: 2 }}
+      />
     </div>
   );
 }
@@ -74,7 +60,7 @@ export default function FAQSection() {
           <p className="faq-intro">
             إجابات على أكثر الأسئلة شيوعاً حول منصة ومضة وكيفية استخدامها داخل القاعات الدراسية.
           </p>
-          <MegaphoneIllustration />
+          <FAQIllustration />
         </div>
 
         <div className="faq-accordion">

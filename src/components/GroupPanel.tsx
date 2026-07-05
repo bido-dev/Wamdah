@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
@@ -372,11 +373,13 @@ export default function GroupPanel({ initialCode, onBack }: GroupPanelProps) {
   return (
     <div className="panel-container" style={{ maxWidth: '750px' }}>
       <button className="back-button" onClick={() => { unsubscribe(); onBack(); }}>
-        &rarr; العودة للرئيسية
+        &rarr; الإلغاء والعودة للرئيسية
       </button>
 
       <div className="panel-header">
-        <div className="panel-header-icon">👥</div>
+        <div className="panel-header-icon" style={{ background: 'transparent' }}>
+          <Image src="/assets/attachment.png" alt="Group Icon" width={48} height={48} />
+        </div>
         <h2 className="panel-title">مشاركة المجموعات (بث جماعي)</h2>
         <p className="panel-desc">
           {role === null && 'اختر دورك، إما كمُرسل لإنشاء رمز مجموعة وبث للمستمعين، أو كمُستقبل للانضمام وتنزيل الملف.'}
@@ -401,17 +404,10 @@ export default function GroupPanel({ initialCode, onBack }: GroupPanelProps) {
       {role === 'sender' && groupSession && (
         <div style={{ animation: 'fadeIn 0.3s' }}>
           <div className="receive-code-display" style={{ marginBottom: '1.5rem' }}>
-            <span className="code-numbers" onClick={() => navigator.clipboard.writeText(groupSession.code)}>
-              {groupSession.code.slice(0, 3)} {groupSession.code.slice(3)}
-            </span>
-            <div className="group-member-count">
-              عدد الطلاب المتصلين بالبث الآن: <span>{groupSession.clientCount}</span> طالب
-            </div>
-            
             {origin && (
               <div className="qr-code-wrapper">
                 <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&color=0085be&data=${encodeURIComponent(
                     `${origin}/app?group=${groupSession.code}`
                   )}`}
                   alt="QR Code Scan to Join Group"
@@ -420,6 +416,23 @@ export default function GroupPanel({ initialCode, onBack }: GroupPanelProps) {
                 />
               </div>
             )}
+            
+            <div className="group-member-count">
+              عدد الطلاب المتصلين بالبث الآن: <span>{groupSession.clientCount}</span> طالب
+            </div>
+
+            <div
+              className="code-digits-container"
+              title="اضغط لنسخ الرمز"
+              onClick={() => navigator.clipboard.writeText(groupSession.code)}
+            >
+              {groupSession.code.split('').map((char, idx) => (
+                <React.Fragment key={idx}>
+                  <span className="code-digit-underline">{char}</span>
+                  {idx === 2 && <span className="code-digit-space" />}
+                </React.Fragment>
+              ))}
+            </div>
           </div>
 
           {!senderSuccess ? (
@@ -453,7 +466,9 @@ export default function GroupPanel({ initialCode, onBack }: GroupPanelProps) {
                     }}
                     onClick={() => inputRefs.current[6]?.click()}
                   >
-                    <div className="upload-icon">📤</div>
+                    <div className="upload-icon" style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+                      <Image src="/assets/files.png" alt="Upload Icon" width={48} height={48} />
+                    </div>
                     <div>
                       <p style={{ fontWeight: 'bold' }}>اسحب الملفات وأفلتها هنا أو اضغط للاختيار</p>
                       <p style={{ fontSize: '0.8rem', color: 'var(--ksu-text-muted)', marginTop: '5px' }}>

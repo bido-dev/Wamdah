@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
@@ -161,11 +162,13 @@ export default function ReceivePanel({ onBack }: ReceivePanelProps) {
   return (
     <div className="panel-container">
       <button className="back-button" onClick={onBack}>
-        &rarr; إلغاء العودة للرئيسية
+        &rarr; الإلغاء والعودة للرئيسية
       </button>
 
       <div className="panel-header">
-        <div className="panel-header-icon">📥</div>
+        <div className="panel-header-icon" style={{ background: 'transparent' }}>
+          <Image src="/assets/attachment.png" alt="Receive Icon" width={48} height={48} />
+        </div>
         <h2 className="panel-title">استقبال الملفات والروابط</h2>
         <p className="panel-desc">
           {!session || session.status === 'waiting'
@@ -184,18 +187,10 @@ export default function ReceivePanel({ onBack }: ReceivePanelProps) {
       ) : session && session.status === 'waiting' ? (
         <div style={{ animation: 'fadeIn 0.3s' }}>
           <div className="receive-code-display">
-            <span
-              className="code-numbers"
-              title="اضغط لنسخ الرمز"
-              onClick={handleCopyCode}
-            >
-              {session.code.slice(0, 3)} {session.code.slice(3)}
-            </span>
-
             {origin && (
               <div className="qr-code-wrapper">
                 <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&color=0085be&data=${encodeURIComponent(
                     `${origin}/app?send=${session.code}`
                   )}`}
                   alt="QR Code Scan to Send"
@@ -205,9 +200,19 @@ export default function ReceivePanel({ onBack }: ReceivePanelProps) {
                 />
               </div>
             )}
-            <p style={{ fontSize: '0.8rem', color: 'var(--ksu-text-muted)', textAlign: 'center' }}>
-              يمكن للمرسل مسح الكود أعلاه بالكاميرا للوصول المباشر والإرسال
-            </p>
+
+            <div
+              className="code-digits-container"
+              title="اضغط لنسخ الرمز"
+              onClick={handleCopyCode}
+            >
+              {session.code.split('').map((char, idx) => (
+                <React.Fragment key={idx}>
+                  <span className="code-digit-underline">{char}</span>
+                  {idx === 2 && <span className="code-digit-space" />}
+                </React.Fragment>
+              ))}
+            </div>
           </div>
 
           <div className="waiting-pulse-container">
@@ -306,11 +311,15 @@ export default function ReceivePanel({ onBack }: ReceivePanelProps) {
 
                       <button
                         className="wamda-btn btn-secondary"
-                        onClick={() => {
+                        disabled={downloadingFile !== null}
+                        onClick={async () => {
+                          for (const file of filesList) {
+                            await downloadFile(file.url, file.name, false);
+                          }
                           setSession(prev => prev ? { ...prev, status: 'downloaded' } : null);
                         }}
                       >
-                        إنهاء واكتمال تنزيل الكل
+                        {downloadingFile ? `جاري تحميل ${downloadingFile}...` : 'تحميل كل الملفات 💾'}
                       </button>
                     </div>
                   );

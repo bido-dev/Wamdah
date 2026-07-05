@@ -211,7 +211,7 @@ export default function SendPanel({ initialCode, onBack }: SendPanelProps) {
   return (
     <div className="panel-container">
       <button className="back-button" onClick={onBack}>
-        &rarr; العودة للرئيسية
+        &rarr; الإلغاء والعودة للرئيسية
       </button>
 
       <div className="panel-header">
