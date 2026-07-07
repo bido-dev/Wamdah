@@ -24,7 +24,7 @@ interface SessionData {
 
 export default function GroupPanel({ initialCode, onBack }: GroupPanelProps) {
   const [role, setRole] = useState<'sender' | 'receiver' | null>(null);
-  
+
   // خاص بالمرسل (إنشاء المجموعة)
   const [groupSession, setGroupSession] = useState<SessionData | null>(null);
   const [activeTab, setActiveTab] = useState<'file' | 'link'>('file');
@@ -33,6 +33,8 @@ export default function GroupPanel({ initialCode, onBack }: GroupPanelProps) {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [senderSuccess, setSenderSuccess] = useState(false);
+  const [endingSession, setEndingSession] = useState(false);
+  const [sessionEnded, setSessionEnded] = useState(false);
 
   // خاص بالمستقبل (الانضمام للمجموعة)
   const [pinCode, setPinCode] = useState<string[]>(Array(6).fill(''));
@@ -89,6 +91,22 @@ export default function GroupPanel({ initialCode, onBack }: GroupPanelProps) {
     if (channelRef.current) {
       supabase.removeChannel(channelRef.current);
       channelRef.current = null;
+    }
+  };
+
+  const handleEndSession = async (code: string, andGoBack?: boolean) => {
+    setEndingSession(true);
+    try {
+      await fetch(`/api/wamda?action=end&code=${code}`, { method: 'DELETE' });
+    } catch {
+      // Non-fatal — navigate away regardless
+    } finally {
+      setEndingSession(false);
+      setSessionEnded(true);
+      if (andGoBack) {
+        unsubscribe();
+        onBack();
+      }
     }
   };
 
@@ -205,7 +223,7 @@ export default function GroupPanel({ initialCode, onBack }: GroupPanelProps) {
           const { data: publicUrlData } = supabase.storage
             .from('uploads')
             .getPublicUrl(storagePath);
-          
+
           uploadedFiles.push({
             name: file.name,
             url: publicUrlData.publicUrl,
@@ -372,7 +390,14 @@ export default function GroupPanel({ initialCode, onBack }: GroupPanelProps) {
 
   return (
     <div className="panel-container" style={{ maxWidth: '750px' }}>
-      <button className="back-button" onClick={() => { unsubscribe(); onBack(); }}>
+      <button className="back-button" onClick={() => {
+        if (role === 'sender' && groupSession && senderSuccess && !sessionEnded) {
+          handleEndSession(groupSession.code, true);
+        } else {
+          unsubscribe();
+          onBack();
+        }
+      }}>
         &rarr; الإلغاء والعودة للرئيسية
       </button>
 
@@ -416,7 +441,7 @@ export default function GroupPanel({ initialCode, onBack }: GroupPanelProps) {
                 />
               </div>
             )}
-            
+
             <div className="group-member-count">
               عدد الطلاب المتصلين بالبث الآن: <span>{groupSession.clientCount}</span> طالب
             </div>
@@ -562,12 +587,33 @@ export default function GroupPanel({ initialCode, onBack }: GroupPanelProps) {
             <div className="success-card">
               <div className="success-icon">✓</div>
               <h3 className="success-title">تم البث للجميع!</h3>
-              <p style={{ color: 'var(--ksu-text-muted)', marginBottom: '1.5rem' }}>
-                تم رفع محتوى البث وسيكون متاحاً لجميع المشتركين لمدة ساعتين قبل حذفه تلقائياً.
-              </p>
-              <button className="wamda-btn btn-secondary" onClick={onBack}>
-                إنهاء البث والعودة
-              </button>
+              {!sessionEnded ? (
+                <>
+                  <p style={{ color: 'var(--ksu-text-muted)', marginBottom: '1.5rem' }}>
+                    محتوى البث متاح للمشتركين. عند الانتهاء، اضغط إنهاء الجلسة لحذف الملفات والبيانات نهائياً.
+                  </p>
+                  <button
+                    className="wamda-btn btn-primary"
+                    onClick={() => handleEndSession(groupSession.code)}
+                    disabled={endingSession}
+                    style={{ marginBottom: '0.75rem' }}
+                  >
+                    {endingSession ? 'جاري الحذف...' : 'إنهاء الجلسة وحذف الملفات 🗑️'}
+                  </button>
+                  <button className="wamda-btn btn-secondary" onClick={onBack}>
+                    الرجوع للرئيسية (الجلسة ستُحذف لاحقاً)
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p style={{ color: 'var(--ksu-success)', fontWeight: 'bold', marginBottom: '1.5rem' }}>
+                    ✅ تم إنهاء الجلسة وحذف جميع الملفات من الخوادم بنجاح.
+                  </p>
+                  <button className="wamda-btn btn-secondary" onClick={onBack}>
+                    العودة للقائمة الرئيسية
+                  </button>
+                </>
+              )}
             </div>
           )}
         </div>
