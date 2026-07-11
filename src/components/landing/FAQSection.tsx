@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
+import { ChevronDown, MessageSquareQuote } from 'lucide-react';
 
 const faqItems = [
   {
@@ -35,12 +35,9 @@ function FAQIllustration() {
   return (
     <div className="faq-illustration" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
       <div className="faq-illustration-glow" />
-      <Image 
-        src="/assets/faq.png" 
-        alt="FAQ Illustration" 
-        width={220} 
-        height={220} 
-        style={{ objectFit: 'contain', zIndex: 2 }}
+      <MessageSquareQuote 
+        className="text-blue-600"
+        style={{ width: '200px', height: '200px', zIndex: 2, strokeWidth: 1 }}
       />
     </div>
   );
@@ -75,16 +72,12 @@ export default function FAQSection() {
                   aria-expanded={isOpen}
                 >
                   <span>{item.question}</span>
-                  <svg
-                    className={`faq-chevron ${isOpen ? 'faq-chevron-open' : ''}`}
+                  <ChevronDown
+                    className={`faq-chevron ${isOpen ? 'faq-chevron-open' : ''} transition-transform duration-200`}
                     width="20"
                     height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
                     aria-hidden="true"
-                  >
-                    <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  </svg>
+                  />
                 </button>
                 {isOpen && <div className="faq-answer">{item.answer}</div>}
               </div>

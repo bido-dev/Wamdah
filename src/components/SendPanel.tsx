@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
+import { Send, AlertTriangle, File as FileIcon, Link as LinkIcon, UploadCloud, CheckCircle2, ArrowRight, ArrowLeft, X } from 'lucide-react';
 
 interface SendPanelProps {
   initialCode?: string;
@@ -211,12 +212,12 @@ export default function SendPanel({ initialCode, onBack }: SendPanelProps) {
   return (
     <div className="panel-container">
       <button className="back-button" onClick={onBack}>
-        &rarr; الإلغاء والعودة للرئيسية
+        <ArrowRight className="w-4 h-4 inline-block ml-1" /> الإلغاء والعودة للرئيسية
       </button>
 
       <div className="panel-header">
         <div className="panel-header-icon" style={{ background: 'transparent' }}>
-          <Image src="/assets/send.png" alt="Send Icon" width={48} height={48} />
+          <Send className="w-12 h-12 text-ksu-blue" />
         </div>
         <h2 className="panel-title">إرسال ملف أو رابط</h2>
         <p className="panel-desc">
@@ -226,7 +227,7 @@ export default function SendPanel({ initialCode, onBack }: SendPanelProps) {
         </p>
       </div>
 
-      {error && <div className="alert-box alert-error">⚠️ {error}</div>}
+      {error && <div className="alert-box alert-error"><AlertTriangle className="w-5 h-5 inline-block mr-2" /> {error}</div>}
 
       {!sessionVerified ? (
         <div style={{ animation: 'fadeIn 0.3s' }}>
@@ -250,7 +251,7 @@ export default function SendPanel({ initialCode, onBack }: SendPanelProps) {
           </div>
 
           <button className="wamda-btn btn-primary" onClick={() => verifyCode()}>
-            الاتصال والتحقق من الرمز &larr;
+            الاتصال والتحقق من الرمز <ArrowLeft className="w-4 h-4 inline-block mr-1" />
           </button>
         </div>
       ) : !success ? (
@@ -263,7 +264,7 @@ export default function SendPanel({ initialCode, onBack }: SendPanelProps) {
                 setError(null);
               }}
             >
-              📁 رفع ملف
+              <FileIcon className="w-4 h-4 inline-block ml-1" /> رفع ملف
             </button>
             <button
               className={`tab-btn ${activeTab === 'link' ? 'active' : ''}`}
@@ -272,7 +273,7 @@ export default function SendPanel({ initialCode, onBack }: SendPanelProps) {
                 setError(null);
               }}
             >
-              🔗 مشاركة رابط
+              <LinkIcon className="w-4 h-4 inline-block ml-1" /> مشاركة رابط
             </button>
           </div>
 
@@ -285,7 +286,7 @@ export default function SendPanel({ initialCode, onBack }: SendPanelProps) {
                 onClick={() => inputRefs.current[6]?.click()}
               >
                 <div className="upload-icon" style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
-                  <Image src="/assets/files.png" alt="Upload Icon" width={48} height={48} />
+                  <UploadCloud className="w-12 h-12 text-gray-400" />
                 </div>
                 <div>
                   <p style={{ fontWeight: 'bold' }}>اسحب الملفات وأفلتها هنا أو اضغط للاختيار</p>
@@ -336,12 +337,12 @@ export default function SendPanel({ initialCode, onBack }: SendPanelProps) {
                             border: 'none',
                             color: 'var(--ksu-error)',
                             cursor: 'pointer',
-                            fontWeight: 'bold',
-                            fontSize: '1.1rem',
+                            display: 'flex',
+                            alignItems: 'center',
                             padding: '0 4px',
                           }}
                         >
-                          ✕
+                          <X className="w-5 h-5" />
                         </button>
                       </li>
                     ))}
@@ -377,12 +378,12 @@ export default function SendPanel({ initialCode, onBack }: SendPanelProps) {
             onClick={handleSubmit}
             disabled={uploading}
           >
-            {uploading ? 'جاري الرفع والإرسال...' : 'إرسال المحتوى فوراً ⚡'}
+            {uploading ? 'جاري الرفع والإرسال...' : <><span style={{display:'flex', alignItems:'center', gap:'8px'}}>إرسال المحتوى فوراً <Send className="w-4 h-4" /></span></>}
           </button>
         </div>
       ) : (
         <div className="success-card">
-          <div className="success-icon">✓</div>
+          <div className="success-icon flex justify-center"><CheckCircle2 className="w-16 h-16 text-green-500" /></div>
           <h3 className="success-title">تم الإرسال بنجاح!</h3>
           <p style={{ color: 'var(--ksu-text-muted)', marginBottom: '2rem' }}>
             وصل الملف/الرابط إلى جهاز الاستقبال فوراً. تم مسح الملفات من خوادم قاعدة البيانات لضمان خصوصيتك.

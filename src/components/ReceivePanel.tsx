@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 import type { RealtimeChannel } from '@supabase/supabase-js';
+import { DownloadCloud, AlertTriangle, CheckCircle2, ExternalLink, Download, ArrowRight, ArrowDown } from 'lucide-react';
 
 interface ReceivePanelProps {
   onBack: () => void;
@@ -162,12 +163,12 @@ export default function ReceivePanel({ onBack }: ReceivePanelProps) {
   return (
     <div className="panel-container">
       <button className="back-button" onClick={onBack}>
-        &rarr; الإلغاء والعودة للرئيسية
+        <ArrowRight className="w-4 h-4 inline-block ml-1" /> الإلغاء والعودة للرئيسية
       </button>
 
       <div className="panel-header">
         <div className="panel-header-icon" style={{ background: 'transparent' }}>
-          <Image src="/assets/attachment.png" alt="Receive Icon" width={48} height={48} />
+          <DownloadCloud className="w-12 h-12 text-ksu-blue" />
         </div>
         <h2 className="panel-title">استقبال الملفات والروابط</h2>
         <p className="panel-desc">
@@ -177,7 +178,7 @@ export default function ReceivePanel({ onBack }: ReceivePanelProps) {
         </p>
       </div>
 
-      {error && <div className="alert-box alert-error">⚠️ {error}</div>}
+      {error && <div className="alert-box alert-error"><AlertTriangle className="w-5 h-5 inline-block mr-2" /> {error}</div>}
 
       {loading ? (
         <div className="waiting-pulse-container">
@@ -222,7 +223,7 @@ export default function ReceivePanel({ onBack }: ReceivePanelProps) {
         </div>
       ) : session && session.status === 'ready' ? (
         <div className="success-card">
-          <div className="success-icon">✓</div>
+          <div className="success-icon flex justify-center"><CheckCircle2 className="w-16 h-16 text-green-500" /></div>
           <h3 className="success-title">استقبال ناجح!</h3>
 
           {session.linkUrl ? (
@@ -243,10 +244,10 @@ export default function ReceivePanel({ onBack }: ReceivePanelProps) {
                 href={session.linkUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="wamda-btn btn-primary"
+                className="wamda-btn btn-primary flex items-center justify-center gap-2"
                 style={{ textDecoration: 'none' }}
               >
-                فتح الرابط المستلم في علامة تبويب جديدة 🔗
+                فتح الرابط المستلم في علامة تبويب جديدة <ExternalLink className="w-5 h-5" />
               </a>
             </div>
           ) : (
@@ -303,7 +304,9 @@ export default function ReceivePanel({ onBack }: ReceivePanelProps) {
                               onClick={() => downloadFile(file.url, file.name, false)}
                               disabled={downloadingFile !== null}
                             >
-                              {downloadingFile === file.name ? 'جاري التحميل...' : 'تحميل 💾'}
+                              <span className="flex items-center gap-1">
+                                {downloadingFile === file.name ? 'جاري التحميل...' : <>تحميل <Download className="w-4 h-4" /></>}
+                              </span>
                             </button>
                           </li>
                         ))}
@@ -317,9 +320,10 @@ export default function ReceivePanel({ onBack }: ReceivePanelProps) {
                             await downloadFile(file.url, file.name, false);
                           }
                           setSession(prev => prev ? { ...prev, status: 'downloaded' } : null);
-                        }}
-                      >
-                        {downloadingFile ? `جاري تحميل ${downloadingFile}...` : 'تحميل كل الملفات 💾'}
+                        }}>
+                        <span className="flex items-center justify-center gap-2">
+                          {downloadingFile ? `جاري تحميل ${downloadingFile}...` : <>تحميل كل الملفات <Download className="w-5 h-5" /></>}
+                        </span>
                       </button>
                     </div>
                   );
@@ -346,7 +350,9 @@ export default function ReceivePanel({ onBack }: ReceivePanelProps) {
                         onClick={() => downloadFile(session.fileUrl || '', session.fileName || 'file', true)}
                         disabled={downloadingFile !== null}
                       >
-                        {downloadingFile ? 'جاري التحميل...' : 'تحميل وحفظ الملف المستلم 💾'}
+                        <span className="flex items-center justify-center gap-2">
+                          {downloadingFile ? 'جاري التحميل...' : <>تحميل وحفظ الملف المستلم <Download className="w-5 h-5" /></>}
+                        </span>
                       </button>
                     </div>
                   );
@@ -361,7 +367,7 @@ export default function ReceivePanel({ onBack }: ReceivePanelProps) {
         </div>
       ) : (
         <div className="success-card">
-          <div className="success-icon" style={{ backgroundColor: 'rgba(0, 132, 189, 0.1)', color: 'var(--ksu-blue)' }}>⬇</div>
+          <div className="success-icon flex justify-center" style={{ backgroundColor: 'rgba(0, 132, 189, 0.1)', color: 'var(--ksu-blue)' }}><ArrowDown className="w-16 h-16" /></div>
           <h3 className="success-title">اكتمل التحميل</h3>
           <p style={{ color: 'var(--ksu-text-muted)', marginBottom: '2rem' }}>
             تم تنزيل الملف بنجاح، وتم حذفه نهائياً وفوراً من قاعدة بيانات &quot;ومضة&quot; المؤقتة لضمان أمان ومساحة الخوادم.

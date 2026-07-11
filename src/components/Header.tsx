@@ -1,12 +1,13 @@
 'use client';
 
 import React from 'react';
+import { Zap } from 'lucide-react';
 
 export default function Header() {
   return (
     <header className="app-header">
       <div className="header-logo-section">
-        <div className="logo-icon">⚡</div>
+        <div className="logo-icon"><Zap className="w-8 h-8 text-yellow-400 fill-current" /></div>
         <div className="logo-text-group">
           <h1 className="logo-title">ومضة</h1>
           <span className="logo-subtitle">مشاركة الملفات الفورية بالقاعات الدراسية</span>

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 import type { RealtimeChannel } from '@supabase/supabase-js';
+import { Users, AlertTriangle, File as FileIcon, Link as LinkIcon, UploadCloud, CheckCircle2, ArrowRight, X, Send, Trash2, Check, ExternalLink, Download } from 'lucide-react';
 
 interface GroupPanelProps {
   initialCode?: string;
@@ -398,12 +399,12 @@ export default function GroupPanel({ initialCode, onBack }: GroupPanelProps) {
           onBack();
         }
       }}>
-        &rarr; الإلغاء والعودة للرئيسية
+        <ArrowRight className="w-4 h-4 inline-block ml-1" /> الإلغاء والعودة للرئيسية
       </button>
 
       <div className="panel-header">
         <div className="panel-header-icon" style={{ background: 'transparent' }}>
-          <Image src="/assets/attachment.png" alt="Group Icon" width={48} height={48} />
+          <Users className="w-12 h-12 text-ksu-blue" />
         </div>
         <h2 className="panel-title">مشاركة المجموعات (بث جماعي)</h2>
         <p className="panel-desc">
@@ -413,7 +414,7 @@ export default function GroupPanel({ initialCode, onBack }: GroupPanelProps) {
         </p>
       </div>
 
-      {error && <div className="alert-box alert-error">⚠️ {error}</div>}
+      {error && <div className="alert-box alert-error"><AlertTriangle className="w-5 h-5 inline-block mr-2" /> {error}</div>}
 
       {/* --- 1. واجهة التحضير التلقائي --- */}
       {role === null && (
@@ -467,13 +468,13 @@ export default function GroupPanel({ initialCode, onBack }: GroupPanelProps) {
                   className={`tab-btn ${activeTab === 'file' ? 'active' : ''}`}
                   onClick={() => { setActiveTab('file'); setError(null); }}
                 >
-                  📁 ملف للمجموعة
+                  <FileIcon className="w-4 h-4 inline-block ml-1" /> ملف للمجموعة
                 </button>
                 <button
                   className={`tab-btn ${activeTab === 'link' ? 'active' : ''}`}
                   onClick={() => { setActiveTab('link'); setError(null); }}
                 >
-                  🔗 رابط للمجموعة
+                  <LinkIcon className="w-4 h-4 inline-block ml-1" /> رابط للمجموعة
                 </button>
               </div>
 
@@ -492,7 +493,7 @@ export default function GroupPanel({ initialCode, onBack }: GroupPanelProps) {
                     onClick={() => inputRefs.current[6]?.click()}
                   >
                     <div className="upload-icon" style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
-                      <Image src="/assets/files.png" alt="Upload Icon" width={48} height={48} />
+                      <UploadCloud className="w-12 h-12 text-gray-400" />
                     </div>
                     <div>
                       <p style={{ fontWeight: 'bold' }}>اسحب الملفات وأفلتها هنا أو اضغط للاختيار</p>
@@ -546,12 +547,12 @@ export default function GroupPanel({ initialCode, onBack }: GroupPanelProps) {
                                 border: 'none',
                                 color: 'var(--ksu-error)',
                                 cursor: 'pointer',
-                                fontWeight: 'bold',
-                                fontSize: '1.1rem',
+                                display: 'flex',
+                                alignItems: 'center',
                                 padding: '0 4px',
                               }}
                             >
-                              ✕
+                              <X className="w-5 h-5" />
                             </button>
                           </li>
                         ))}
@@ -580,12 +581,12 @@ export default function GroupPanel({ initialCode, onBack }: GroupPanelProps) {
               )}
 
               <button className="wamda-btn btn-primary" onClick={handleSenderSubmit} disabled={uploading}>
-                بث المحتوى للمجموعة الآن 🚀
+                <span className="flex items-center justify-center gap-2">بث المحتوى للمجموعة الآن <Send className="w-4 h-4" /></span>
               </button>
             </div>
           ) : (
             <div className="success-card">
-              <div className="success-icon">✓</div>
+              <div className="success-icon flex justify-center"><CheckCircle2 className="w-16 h-16 text-green-500" /></div>
               <h3 className="success-title">تم البث للجميع!</h3>
               {!sessionEnded ? (
                 <>
@@ -598,7 +599,7 @@ export default function GroupPanel({ initialCode, onBack }: GroupPanelProps) {
                     disabled={endingSession}
                     style={{ marginBottom: '0.75rem' }}
                   >
-                    {endingSession ? 'جاري الحذف...' : 'إنهاء الجلسة وحذف الملفات 🗑️'}
+                    <span className="flex items-center justify-center gap-2">{endingSession ? 'جاري الحذف...' : <>إنهاء الجلسة وحذف الملفات <Trash2 className="w-4 h-4" /></>}</span>
                   </button>
                   <button className="wamda-btn btn-secondary" onClick={onBack}>
                     الرجوع للرئيسية (الجلسة ستُحذف لاحقاً)
@@ -606,8 +607,8 @@ export default function GroupPanel({ initialCode, onBack }: GroupPanelProps) {
                 </>
               ) : (
                 <>
-                  <p style={{ color: 'var(--ksu-success)', fontWeight: 'bold', marginBottom: '1.5rem' }}>
-                    ✅ تم إنهاء الجلسة وحذف جميع الملفات من الخوادم بنجاح.
+                  <p style={{ color: 'var(--ksu-success)', fontWeight: 'bold', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Check className="w-5 h-5" /> تم إنهاء الجلسة وحذف جميع الملفات من الخوادم بنجاح.
                   </p>
                   <button className="wamda-btn btn-secondary" onClick={onBack}>
                     العودة للقائمة الرئيسية
@@ -640,7 +641,7 @@ export default function GroupPanel({ initialCode, onBack }: GroupPanelProps) {
           </div>
 
           <button className="wamda-btn btn-primary" onClick={() => handleJoinGroup()} disabled={loading}>
-            {loading ? 'جاري الاتصال بالمجموعة...' : 'الانضمام واستقبال البث 👥'}
+            <span className="flex items-center justify-center gap-2">{loading ? 'جاري الاتصال بالمجموعة...' : <>الانضمام واستقبال البث <Users className="w-4 h-4" /></>}</span>
           </button>
         </div>
       )}
@@ -657,7 +658,7 @@ export default function GroupPanel({ initialCode, onBack }: GroupPanelProps) {
             </div>
           ) : (
             <div className="success-card" style={{ animation: 'bounceIn 0.5s' }}>
-              <div className="success-icon">✓</div>
+              <div className="success-icon flex justify-center"><CheckCircle2 className="w-16 h-16 text-green-500" /></div>
               <h3 className="success-title">محتوى البث جاهز!</h3>
 
               {joinedSession.linkUrl ? (
@@ -674,10 +675,10 @@ export default function GroupPanel({ initialCode, onBack }: GroupPanelProps) {
                     href={joinedSession.linkUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="wamda-btn btn-primary"
+                    className="wamda-btn btn-primary flex items-center justify-center gap-2"
                     style={{ textDecoration: 'none' }}
                   >
-                    فتح الرابط المستلم 🔗
+                    فتح الرابط المستلم <ExternalLink className="w-4 h-4" />
                   </a>
                 </div>
               ) : (
@@ -734,7 +735,7 @@ export default function GroupPanel({ initialCode, onBack }: GroupPanelProps) {
                                   onClick={() => downloadFile(file.url, file.name, false)}
                                   disabled={downloadingFile !== null}
                                 >
-                                  {downloadingFile === file.name ? 'جاري التحميل...' : 'تحميل 💾'}
+                                  <span className="flex items-center gap-1">{downloadingFile === file.name ? 'جاري التحميل...' : <>تحميل <Download className="w-4 h-4" /></>}</span>
                                 </button>
                               </li>
                             ))}
@@ -769,7 +770,7 @@ export default function GroupPanel({ initialCode, onBack }: GroupPanelProps) {
                             onClick={() => downloadFile(joinedSession.fileUrl || '', joinedSession.fileName || 'file', true)}
                             disabled={downloadingFile !== null}
                           >
-                            {downloadingFile ? 'جاري التحميل...' : 'تحميل وحفظ الملف المستلم 💾'}
+                            <span className="flex items-center justify-center gap-2">{downloadingFile ? 'جاري التحميل...' : <>تحميل وحفظ الملف المستلم <Download className="w-4 h-4" /></>}</span>
                           </button>
                         </div>
                       );
