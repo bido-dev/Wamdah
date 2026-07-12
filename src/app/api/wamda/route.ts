@@ -264,7 +264,31 @@ export async function GET(req: NextRequest) {
       return NextResponse.redirect(session.fileUrl);
     }
 
+    // --- ACTION: get site statistics ---
+    if (action === 'stats') {
+      const { count: totalSessions } = await supabase
+        .from('sessions')
+        .select('*', { count: 'exact', head: true });
+
+      const { count: fileSessions } = await supabase
+        .from('sessions')
+        .select('*', { count: 'exact', head: true })
+        .not('file_url', 'is', null);
+
+      const { count: linkSessions } = await supabase
+        .from('sessions')
+        .select('*', { count: 'exact', head: true })
+        .not('link_url', 'is', null);
+
+      return NextResponse.json({
+        users: totalSessions ?? 0,
+        files: fileSessions ?? 0,
+        links: linkSessions ?? 0,
+      });
+    }
+
     return NextResponse.json({ error: 'إجراء غير معروف' }, { status: 400 });
+
   } catch (error) {
     console.error('API GET error:', error);
     return NextResponse.json({ error: 'حدث خطأ في الخادم' }, { status: 500 });

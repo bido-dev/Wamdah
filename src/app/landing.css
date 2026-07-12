@@ -318,6 +318,58 @@
   box-shadow: 0 6px 20px rgba(0, 131, 188, 0.25);
 }
 
+/* ── Hero Stats ── */
+.hero-stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2.5rem;
+  margin-top: 1.5rem;
+}
+
+.hero-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.hero-stat-top {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hero-stat-icon {
+  width: 22px;
+  height: 22px;
+  color: var(--landing-purple);
+  flex-shrink: 0;
+}
+
+.hero-stat-number {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--landing-navy);
+  letter-spacing: -1px;
+  font-family: var(--font-cairo), Cairo, system-ui, sans-serif;
+}
+
+.hero-stat-label {
+  font-size: 0.75rem;
+  color: var(--landing-text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.hero-stat-divider {
+  width: 1px;
+  height: 40px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 1px;
+}
+
 /* ── App Showcase ── */
 .landing-showcase {
   background: var(--landing-purple);
@@ -677,6 +729,116 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+
+/* ── Stats Section ── */
+.stats-section {
+  background: linear-gradient(135deg, var(--landing-navy) 0%, #1a2d5a 50%, var(--landing-purple-dark) 100%);
+  padding: 5rem 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.stats-section::before {
+  content: '';
+  position: absolute;
+  top: -60px;
+  left: -60px;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(41, 171, 226, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.stats-section::after {
+  content: '';
+  position: absolute;
+  bottom: -60px;
+  right: -60px;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 131, 188, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.stats-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.stats-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: white;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.5px;
+}
+
+.stats-subtitle {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 400;
+}
+
+.stats-grid {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  min-width: 220px;
+  flex: 1;
+  max-width: 280px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.stat-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+}
+
+.stat-icon-wrap {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.25rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.stat-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.stat-number {
+  font-size: 2.8rem;
+  font-weight: 900;
+  color: white;
+  line-height: 1;
+  margin-bottom: 0.6rem;
+  letter-spacing: -1px;
+}
+
+.stat-label {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+  line-height: 1.4;
+}
 
 /* ── Team Section Title ── */
 .team-section-title {
