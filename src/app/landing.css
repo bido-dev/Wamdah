@@ -318,6 +318,58 @@
   box-shadow: 0 6px 20px rgba(0, 131, 188, 0.25);
 }
 
+/* ── Hero Stats ── */
+.hero-stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2.5rem;
+  margin-top: 1.5rem;
+}
+
+.hero-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.hero-stat-top {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hero-stat-icon {
+  width: 22px;
+  height: 22px;
+  color: var(--landing-purple);
+  flex-shrink: 0;
+}
+
+.hero-stat-number {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--landing-navy);
+  letter-spacing: -1px;
+  font-family: var(--font-cairo), Cairo, system-ui, sans-serif;
+}
+
+.hero-stat-label {
+  font-size: 0.75rem;
+  color: var(--landing-text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.hero-stat-divider {
+  width: 1px;
+  height: 40px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 1px;
+}
+
 /* ── App Showcase ── */
 .landing-showcase {
   background: var(--landing-purple);
@@ -678,6 +730,116 @@
 }
 
 
+/* ── Stats Section ── */
+.stats-section {
+  background: linear-gradient(135deg, var(--landing-navy) 0%, #1a2d5a 50%, var(--landing-purple-dark) 100%);
+  padding: 5rem 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.stats-section::before {
+  content: '';
+  position: absolute;
+  top: -60px;
+  left: -60px;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(41, 171, 226, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.stats-section::after {
+  content: '';
+  position: absolute;
+  bottom: -60px;
+  right: -60px;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 131, 188, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.stats-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.stats-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: white;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.5px;
+}
+
+.stats-subtitle {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 400;
+}
+
+.stats-grid {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  min-width: 220px;
+  flex: 1;
+  max-width: 280px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.stat-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+}
+
+.stat-icon-wrap {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.25rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.stat-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.stat-number {
+  font-size: 2.8rem;
+  font-weight: 900;
+  color: white;
+  line-height: 1;
+  margin-bottom: 0.6rem;
+  letter-spacing: -1px;
+}
+
+.stat-label {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
 /* ── Team Section Title ── */
 .team-section-title {
   text-align: center;
@@ -688,17 +850,11 @@
   letter-spacing: -0.5px;
 }
 
-/* ── Supervisor Card (same design as team cards) ── */
+/* ── Supervisor Card ── */
 .supervisor-row {
   margin-top: 2rem;
   margin-bottom: -1.5rem;
   justify-content: center;
-}
-
-.team-card-supervisor .team-card-shape {
-  background: linear-gradient(160deg, #0085BE 0%, var(--landing-navy) 100%);
-  clip-path: none;
-  border-radius: 16px;
 }
 
 /* ── Team Section ── */
@@ -721,120 +877,122 @@
 }
 
 .team-card {
-  position: relative;
   width: 260px;
   text-align: center;
   padding-bottom: 2rem;
   cursor: pointer;
   text-decoration: none;
-  display: block;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.3s ease;
 }
 
 .team-card:hover {
   transform: translateY(-10px);
 }
 
-.team-card:hover .team-card-shape {
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
-}
-
-.team-card:hover .team-photo-img {
-  filter: drop-shadow(0 12px 30px rgba(0, 0, 0, 0.3));
-}
-
-
-.team-card-shape {
-  position: absolute;
-  bottom: 60px;
-  left: 50%;
-  transform: translateX(-50%) skewX(-8deg);
-  width: 110%;
-  height: 280px;
-  z-index: 0;
-}
-
-.team-card-sky .team-card-shape {
-  background: linear-gradient(160deg, var(--landing-sky) 0%, var(--landing-purple) 100%);
-  clip-path: none;
-  border-radius: 20px;
-}
-
-.team-card-blue .team-card-shape {
-  background: linear-gradient(160deg, var(--landing-purple) 0%, var(--landing-purple-dark) 100%);
-  clip-path: none;
-  border-radius: 20px;
-}
-
-.team-card-navy .team-card-shape {
-  background: linear-gradient(160deg, var(--landing-navy) 0%, #1e305e 100%);
-  clip-path: none;
-  border-radius: 20px;
-}
-
 .team-card-photo {
   position: relative;
-  z-index: 1;
-  height: 280px;
-  margin-bottom: 60px;
+  width: 100%;
+  height: 280px; /* Total height including pop-out */
+  margin-bottom: 24px;
   display: flex;
   align-items: flex-end;
   justify-content: center;
 }
 
-.team-photo-img {
-  width: auto;
-  max-width: 85%;
-  height: auto;
-  max-height: 250px;
-  object-fit: contain;
-  margin-bottom: 15px;
-  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.2));
-  transition: transform 0.3s ease;
+.team-card-shape {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 230px; /* Leaves 50px for the head to pop out */
+  border-radius: 24px;
+  z-index: 0;
+  transition: box-shadow 0.3s ease;
 }
 
-/* تكبير صورة بلال زكار بشكل مخصص */
-.team-card-sky .team-photo-img {
-  max-height: 290px;
-  max-width: 95%;
-  transform: scale(1.18);
+.team-card:hover .team-card-shape {
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15);
+}
+
+.team-card-sky .team-card-shape {
+  background: linear-gradient(160deg, var(--landing-sky) 0%, var(--landing-purple) 100%);
+}
+
+.team-card-blue .team-card-shape {
+  background: linear-gradient(160deg, var(--landing-purple) 0%, var(--landing-purple-dark) 100%);
+}
+
+.team-card-navy .team-card-shape {
+  background: linear-gradient(160deg, var(--landing-navy) 0%, #1e305e 100%);
+}
+
+/* صورة المشرف مربع عادي داخل نفس الحاوية */
+.team-card-supervisor .team-card-shape {
+  background: linear-gradient(160deg, #0085BE 0%, var(--landing-navy) 100%);
+}
+
+.team-photo-img {
+  position: relative;
+  z-index: 1;
+  width: 82%; /* Perfectly fits between the left and right rounded corners! */
+  max-width: 82%;
+  height: auto;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: bottom;
+  display: block;
+  /* Remove border radius so the natural straight cut sits on the straight edge */
+  border-radius: 0;
+  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.15));
+  transition: all 0.4s ease;
   transform-origin: bottom center;
 }
 
-/* صورة المشرف مربع عادي */
+/* صورة المشرف: توحيد المحاذاة مع باقي أعضاء الفريق */
 .team-card-supervisor .team-photo-img {
-  width: 75%;
-  max-width: 75%;
+  width: 82%;
+  max-width: 82%;
   height: auto;
-  max-height: 210px;
-  object-fit: cover;
-  margin-bottom: 20px;
-  border-radius: 12px;
-  filter: none;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: bottom;
+  margin-bottom: 0;
+  border-radius: 0;
 }
 
+.team-card:hover .team-photo-img {
+  filter: drop-shadow(0 12px 30px rgba(0, 0, 0, 0.25));
+  transform: scale(1.05);
+}
+
+.team-card-supervisor:hover .team-photo-img {
+  transform: scale(1.03);
+}
+
+/* تكبير صورة بلال زكار بشكل مخصص لملائمة القص */
+.team-card-sky .team-photo-img {
+  width: 88%;
+  max-width: 88%;
+  transform: scale(1.05);
+}
+.team-card-sky:hover .team-photo-img {
+  transform: scale(1.1);
+}
 
 .team-card-info {
-  position: absolute;
-  bottom: 68px;
-  left: 0;
-  right: 0;
+  text-align: center;
   z-index: 2;
-  padding: 0 1rem;
+  width: 100%;
 }
 
 .team-name {
-  font-size: 1.15rem;
+  font-size: 1.25rem;
   font-weight: 800;
-  color: white;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-  margin-bottom: 0.2rem;
-}
-
-.team-role {
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.9);
-  font-weight: 500;
+  color: var(--landing-navy);
+  margin-bottom: 0.25rem;
 }
 
 /* ── Responsive ── */
