@@ -31,7 +31,7 @@ export default function TeamSection() {
 
         <h2 className="team-section-title">أعضاء الفريق</h2>
 
-        {/* المشرف - نفس تصميم بطاقات الفريق */}
+        {/* المشرف */}
         <div className="team-cards supervisor-row">
           <a
             href="https://www.linkedin.com/in/sultan-alsarra-56977a63/"
@@ -40,10 +40,10 @@ export default function TeamSection() {
             className="team-card team-card-supervisor"
             aria-label="LinkedIn profile of DR. Sultan Alsarra"
           >
-            <div className="team-card-shape" aria-hidden="true" />
             <div className="team-card-photo">
+              <div className="team-card-shape" aria-hidden="true" />
               <Image
-                src="/assets/team4.png"
+                src="/assets/team-supervisor.png"
                 alt="DR. Sultan Alsarra"
                 width={280}
                 height={360}
@@ -68,8 +68,8 @@ export default function TeamSection() {
               className={`team-card team-card-${member.variant}`}
               aria-label={`LinkedIn profile of ${member.name}`}
             >
-              <div className="team-card-shape" aria-hidden="true" />
               <div className="team-card-photo">
+                <div className="team-card-shape" aria-hidden="true" />
                 <Image
                   src={member.image}
                   alt={member.name}
