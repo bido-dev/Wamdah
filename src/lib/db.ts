@@ -5,7 +5,7 @@ import crypto from 'crypto';
 export interface SessionRow {
   id: string;
   pin_code: string;
-  session_type: 'RECEIVE' | 'GROUP';
+  session_type: 'RECEIVE' | 'GROUP' | 'DROPBOX';
   file_url: string | null;
   file_name: string | null;
   file_type: string | null;
@@ -16,10 +16,20 @@ export interface SessionRow {
   created_at: string;
 }
 
+export interface SessionFileRow {
+  id: string;
+  session_pin: string;
+  file_url: string;
+  file_name: string;
+  file_type: string | null;
+  file_size: number | null;
+  uploaded_at: string;
+}
+
 // Client-facing session type used by API responses and frontend components
 export interface Session {
   code: string;
-  type: 'individual' | 'group';
+  type: 'individual' | 'group' | 'dropbox';
   createdAt: number;
   fileUrl?: string;
   fileName?: string;
@@ -34,7 +44,7 @@ export interface Session {
 function rowToSession(row: SessionRow): Session {
   return {
     code: row.pin_code,
-    type: row.session_type === 'GROUP' ? 'group' : 'individual',
+    type: row.session_type === 'GROUP' ? 'group' : row.session_type === 'DROPBOX' ? 'dropbox' : 'individual',
     createdAt: new Date(row.created_at).getTime(),
     fileUrl: row.file_url ?? undefined,
     fileName: row.file_name ?? undefined,
@@ -53,9 +63,9 @@ function generateSecurePin(): string {
 }
 
 export const db = {
-  async createSession(type: 'individual' | 'group'): Promise<Session> {
+  async createSession(type: 'individual' | 'group' | 'dropbox'): Promise<Session> {
     const pin = generateSecurePin();
-    const sessionType = type === 'group' ? 'GROUP' : 'RECEIVE';
+    const sessionType = type === 'group' ? 'GROUP' : type === 'dropbox' ? 'DROPBOX' : 'RECEIVE';
 
     const { data, error } = await supabase
       .from('sessions')
@@ -135,5 +145,36 @@ export const db = {
       .eq('pin_code', code);
 
     return !error;
+  },
+
+  async addSessionFile(code: string, fileData: { fileUrl: string; fileName: string; fileType?: string; fileSize?: number }): Promise<SessionFileRow | null> {
+    const { data, error } = await supabase
+      .from('session_files')
+      .insert({
+        session_pin: code,
+        file_url: fileData.fileUrl,
+        file_name: fileData.fileName,
+        file_type: fileData.fileType || null,
+        file_size: fileData.fileSize || null,
+      })
+      .select()
+      .single();
+
+    if (error || !data) {
+      console.error('Error adding session file:', error);
+      return null;
+    }
+    return data as SessionFileRow;
+  },
+
+  async getSessionFiles(code: string): Promise<SessionFileRow[]> {
+    const { data, error } = await supabase
+      .from('session_files')
+      .select('*')
+      .eq('session_pin', code)
+      .order('uploaded_at', { ascending: false });
+
+    if (error || !data) return [];
+    return data as SessionFileRow[];
   },
 };

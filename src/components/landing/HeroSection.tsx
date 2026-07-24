@@ -102,9 +102,14 @@ export default function HeroSection() {
               استقبال
             </Link>
           </div>
-          <Link href="/app?group=1" className="hero-btn hero-btn-solo">
-            مجموعة
-          </Link>
+          <div className="hero-actions-row">
+            <Link href="/app?group=1" className="hero-btn hero-btn-solo">
+              مجموعة
+            </Link>
+            <Link href="/app?dropbox=1" className="hero-btn hero-btn-solo" style={{ background: '#c19c5b' }}>
+              صندوق تسليم
+            </Link>
+          </div>
 
           {/* إحصائيات حية */}
           <div className="hero-stats">

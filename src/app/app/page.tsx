@@ -5,10 +5,10 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import SendPanel from '@/components/SendPanel';
 import ReceivePanel from '@/components/ReceivePanel';
-import GroupPanel from '@/components/GroupPanel';
+import GroupPanel from '@/components/GroupPanel';import DropboxReceiverPanel from '@/components/DropboxReceiverPanel';
 
 function WamdaContent() {
-  const [activeMode, setActiveMode] = useState<'send' | 'receive' | 'group' | null>(null);
+  const [activeMode, setActiveMode] = useState<'send' | 'receive' | 'group' | 'dropbox' | null>(null);
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -16,6 +16,7 @@ function WamdaContent() {
     const sendCode = searchParams.get('send');
     const receiveCode = searchParams.get('receive');
     const groupCode = searchParams.get('group');
+    const dropboxCode = searchParams.get('dropbox');
 
     if (sendCode) {
       setActiveMode('send');
@@ -23,6 +24,8 @@ function WamdaContent() {
       setActiveMode('receive');
     } else if (groupCode) {
       setActiveMode('group');
+    } else if (dropboxCode) {
+      setActiveMode('dropbox');
     } else {
       router.replace('/');
     }
@@ -33,6 +36,7 @@ function WamdaContent() {
       {activeMode === 'send' && <SendPanel initialCode={searchParams.get('send') || undefined} onBack={() => router.push('/')} />}
       {activeMode === 'receive' && <ReceivePanel onBack={() => router.push('/')} />}
       {activeMode === 'group' && <GroupPanel initialCode={searchParams.get('group') || undefined} onBack={() => router.push('/')} />}
+      {activeMode === 'dropbox' && <DropboxReceiverPanel onBack={() => router.push('/')} />}
     </main>
   );
 }

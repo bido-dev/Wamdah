@@ -36,9 +36,9 @@ export async function POST(req: NextRequest) {
     // --- ACTION: create session ---
     if (action === 'create') {
       const body = await req.json();
-      const { type } = body as { type: 'individual' | 'group' };
+      const { type } = body as { type: 'individual' | 'group' | 'dropbox' };
 
-      if (!type || (type !== 'individual' && type !== 'group')) {
+      if (!type || !['individual', 'group', 'dropbox'].includes(type)) {
         return NextResponse.json({ error: 'نوع الجلسة غير صالح' }, { status: 400 });
       }
 
@@ -120,13 +120,22 @@ export async function POST(req: NextRequest) {
           );
         }
 
-        await db.updateSession(code, {
-          fileName: directFileName || 'file',
-          fileType: directFileType || 'application/octet-stream',
-          fileSize: directFileSize || 0,
-          fileUrl: directFileUrl,
-          status: 'ready',
-        });
+        if (session.type === 'dropbox') {
+          await db.addSessionFile(code, {
+            fileName: directFileName || 'file',
+            fileType: directFileType || 'application/octet-stream',
+            fileSize: directFileSize || 0,
+            fileUrl: directFileUrl,
+          });
+        } else {
+          await db.updateSession(code, {
+            fileName: directFileName || 'file',
+            fileType: directFileType || 'application/octet-stream',
+            fileSize: directFileSize || 0,
+            fileUrl: directFileUrl,
+            status: 'ready',
+          });
+        }
 
         return NextResponse.json({ success: true, message: 'تم رفع الملف بنجاح' });
       }
@@ -177,13 +186,22 @@ export async function POST(req: NextRequest) {
           .from('uploads')
           .getPublicUrl(storagePath);
 
-        await db.updateSession(code, {
-          fileName: file.name,
-          fileType: file.type,
-          fileSize: file.size,
-          fileUrl: publicUrlData.publicUrl,
-          status: 'ready',
-        });
+        if (session.type === 'dropbox') {
+          await db.addSessionFile(code, {
+            fileName: file.name,
+            fileType: file.type,
+            fileSize: file.size,
+            fileUrl: publicUrlData.publicUrl,
+          });
+        } else {
+          await db.updateSession(code, {
+            fileName: file.name,
+            fileType: file.type,
+            fileSize: file.size,
+            fileUrl: publicUrlData.publicUrl,
+            status: 'ready',
+          });
+        }
 
         return NextResponse.json({ success: true, message: 'تم رفع الملف بنجاح' });
       }

@@ -14,7 +14,7 @@ export default function SendPanel({ initialCode, onBack }: SendPanelProps) {
   const [code, setCode] = useState<string[]>(Array(6).fill(''));
   const [error, setError] = useState<string | null>(null);
   const [sessionVerified, setSessionVerified] = useState(false);
-  const [sessionType, setSessionType] = useState<'individual' | 'group' | null>(null);
+  const [sessionType, setSessionType] = useState<'individual' | 'group' | 'dropbox' | null>(null);
   const [activeTab, setActiveTab] = useState<'file' | 'link'>('file');
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [linkUrl, setLinkUrl] = useState('');
@@ -182,22 +182,42 @@ export default function SendPanel({ initialCode, onBack }: SendPanelProps) {
           setUploadProgress(10 + Math.floor((completedFilesCount / selectedFiles.length) * 70));
         }
 
-        // Post metadata to server
-        const res = await fetch('/api/wamda?action=upload', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            code: fullCode,
-            fileUrl: JSON.stringify(uploadedFiles),
-            fileName: 'multiple_files',
-            fileType: 'application/json',
-            fileSize: uploadedFiles.reduce((acc, f) => acc + f.size, 0),
-          }),
-        });
+        if (sessionType === 'dropbox') {
+          for (const file of uploadedFiles) {
+            const res = await fetch('/api/wamda?action=upload', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                code: fullCode,
+                fileUrl: file.url,
+                fileName: file.name,
+                fileType: file.type,
+                fileSize: file.size,
+              }),
+            });
+            if (!res.ok) {
+              const errData = await res.json();
+              throw new Error(errData.error || 'حدث خطأ أثناء حفظ بيانات الملف');
+            }
+          }
+        } else {
+          // Post metadata to server
+          const res = await fetch('/api/wamda?action=upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              code: fullCode,
+              fileUrl: JSON.stringify(uploadedFiles),
+              fileName: 'multiple_files',
+              fileType: 'application/json',
+              fileSize: uploadedFiles.reduce((acc, f) => acc + f.size, 0),
+            }),
+          });
 
-        if (!res.ok) {
-          const errData = await res.json();
-          throw new Error(errData.error || 'حدث خطأ أثناء حفظ بيانات الملفات');
+          if (!res.ok) {
+            const errData = await res.json();
+            throw new Error(errData.error || 'حدث خطأ أثناء حفظ بيانات الملفات');
+          }
         }
       }
 
@@ -223,7 +243,7 @@ export default function SendPanel({ initialCode, onBack }: SendPanelProps) {
         <p className="panel-desc">
           {!sessionVerified
             ? 'أدخل الرمز المكون من 6 أرقام الظاهر على شاشة المستقبل للاتصال وإرسال الملف فورا.'
-            : `متصل الآن بجلسة استقبال (${sessionType === 'group' ? 'مجموعة' : 'فردية'})`}
+            : `متصل الآن بجلسة استقبال (${sessionType === 'group' ? 'مجموعة' : sessionType === 'dropbox' ? 'صندوق تسليم' : 'فردية'})`}
         </p>
       </div>
 
